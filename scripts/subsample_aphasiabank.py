@@ -22,6 +22,8 @@ def main():
     ap.add_argument("--min-words", type=int, default=2,
                     help="drop clips with transcript word_count below this")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--severity-only", choices=["mild", "moderate", "severe", "very_severe"],
+                    default=None, help="Restrict sampling to a single severity bucket (R3 curriculum)")
     args = ap.parse_args()
 
     rows = [json.loads(l) for l in open(args.input, encoding="utf-8") if l.strip()]
@@ -42,13 +44,17 @@ def main():
         print(f"  bucket {k!r}: {len(v)} clips")
 
     # Target proportions per bucket (boost hard severity, keep some controls)
-    targets = {
-        "mild":         12000,
-        "moderate":     10000,
-        "severe":       10000,
-        "very_severe":   8000,
-        "unlabeled":     0,   # skip — mostly controls + unscored
-    }
+    if args.severity_only:
+        targets = {k: 0 for k in ("mild", "moderate", "severe", "very_severe", "unlabeled")}
+        targets[args.severity_only] = args.target
+    else:
+        targets = {
+            "mild":         12000,
+            "moderate":     10000,
+            "severe":       10000,
+            "very_severe":   8000,
+            "unlabeled":     0,   # skip — mostly controls + unscored
+        }
     # Scale to requested total
     s = sum(targets.values())
     if s != args.target:

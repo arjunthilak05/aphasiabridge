@@ -21,8 +21,9 @@ Usage:
 from __future__ import annotations
 import os, sys, json, argparse, time
 
-os.environ.setdefault("HF_HOME", r"D:\Downloads\huggingface_cache")
-os.environ.setdefault("HF_HUB_CACHE", r"D:\Downloads\huggingface_cache\hub")
+_WIN_HF = r"D:\Downloads\huggingface_cache"
+os.environ.setdefault("HF_HOME", _WIN_HF if os.path.isdir(_WIN_HF) else os.path.expanduser("~/.cache/huggingface"))
+os.environ.setdefault("HF_HUB_CACHE", os.path.join(os.environ["HF_HOME"], "hub"))
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 os.environ["TORCHINDUCTOR_DISABLE"] = "1"
 
@@ -154,48 +155,60 @@ def main():
     ap.add_argument("--holdout-manifest", default=None,
                     help="Optional explicit held-out JSONL. Overrides --holdout-frac. "
                          "Training uses --manifest as-is; eval uses this file.")
+    ap.add_argument("--skip-post-eval", action="store_true",
+                    help="Skip the UASpeech Windows-only post-training eval sweep (H100 runs)")
+    ap.add_argument("--resume-from", default=None,
+                    help="Checkpoint directory to resume training from (R3 curriculum phase 2)")
+    ap.add_argument("--full-finetune", action="store_true",
+                    help="Full fine-tune instead of LoRA: load_in_4bit=False, full_finetuning=True, "
+                         "skip get_peft_model. Use lower LR (~3e-5). R2 of H100 runbook.")
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    print(f"[{time.strftime('%H:%M:%S')}] loading model {MODEL_ID} ...", flush=True)
+    print(f"[{time.strftime('%H:%M:%S')}] loading model {MODEL_ID} "
+          f"(full_finetune={args.full_finetune}) ...", flush=True)
     model, processor = FastModel.from_pretrained(
         model_name=MODEL_ID,
         dtype=None,
         max_seq_length=args.max_seq_length,
-        load_in_4bit=True,
-        full_finetuning=False,
+        load_in_4bit=not args.full_finetune,
+        full_finetuning=args.full_finetune,
     )
     print(f"  loaded in cuda; VRAM={torch.cuda.memory_allocated()/1e9:.2f} GB")
 
-    print(f"[{time.strftime('%H:%M:%S')}] applying LoRA (r={args.lora_r}, alpha={args.lora_alpha}) ...", flush=True)
-    model = FastModel.get_peft_model(
-        model,
-        finetune_vision_layers=False,
-        finetune_language_layers=True,
-        finetune_attention_modules=True,
-        finetune_mlp_modules=True,
-        r=args.lora_r,
-        lora_alpha=args.lora_alpha,
-        lora_dropout=0.1,                      # Unsloth-recommended for Gemma 3/4
-        bias="none",
-        random_state=3407,
-        use_rslora=False,
-        loftq_config=None,
-        target_modules=[
-            # --- language tower (42 decoder layers x 7 proj types) ---
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj",
-            # --- audio encoder (USM-style audio_tower, 30 blocks) ---
-            # Inner Linear sits inside wrappers: feed_forwardN.ffw_layer_M.linear
-            "ffw_layer_1.linear",
-            "ffw_layer_2.linear",
-            "relative_k_proj",        # relative-position attention (12 instances)
-            "input_proj_linear",      # audio input projection
-            "output_proj",            # audio output projection
-            "embedding_projection",   # audio embedding projection
-        ],
-    )
+    if not args.full_finetune:
+        print(f"[{time.strftime('%H:%M:%S')}] applying LoRA (r={args.lora_r}, alpha={args.lora_alpha}) ...", flush=True)
+        model = FastModel.get_peft_model(
+            model,
+            finetune_vision_layers=False,
+            finetune_language_layers=True,
+            finetune_attention_modules=True,
+            finetune_mlp_modules=True,
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            lora_dropout=0.1,                      # Unsloth-recommended for Gemma 3/4
+            bias="none",
+            random_state=3407,
+            use_rslora=False,
+            loftq_config=None,
+            target_modules=[
+                # --- language tower (42 decoder layers x 7 proj types) ---
+                "q_proj", "k_proj", "v_proj", "o_proj",
+                "gate_proj", "up_proj", "down_proj",
+                # --- audio encoder (USM-style audio_tower, 30 blocks) ---
+                # Inner Linear sits inside wrappers: feed_forwardN.ffw_layer_M.linear
+                "ffw_layer_1.linear",
+                "ffw_layer_2.linear",
+                "relative_k_proj",        # relative-position attention (12 instances)
+                "input_proj_linear",      # audio input projection
+                "output_proj",            # audio output projection
+                "embedding_projection",   # audio embedding projection
+            ],
+        )
+    else:
+        print(f"[{time.strftime('%H:%M:%S')}] FULL FINE-TUNE mode — no LoRA adapters. "
+              f"All parameters trainable.", flush=True)
 
     # Load manifest and convert to Dataset
     records = load_manifest(args.manifest)
@@ -276,10 +289,11 @@ def main():
         ),
     )
 
-    print(f"[{time.strftime('%H:%M:%S')}] starting training ({args.max_steps} steps) ...", flush=True)
+    print(f"[{time.strftime('%H:%M:%S')}] starting training ({args.max_steps} steps"
+          f"{', resume=' + args.resume_from if args.resume_from else ''}) ...", flush=True)
     torch.cuda.reset_peak_memory_stats()
     t0 = time.time()
-    stats = trainer.train()
+    stats = trainer.train(resume_from_checkpoint=args.resume_from) if args.resume_from else trainer.train()
     elapsed = time.time() - t0
     peak = torch.cuda.max_memory_reserved() / 1e9
 
@@ -288,11 +302,12 @@ def main():
     print(f"  peak VRAM:        {peak:.2f} GB")
     print(f"  final train loss: {stats.metrics.get('train_loss')}")
 
-    # Save LoRA
-    lora_dir = os.path.join(args.output_dir, "lora_final")
-    model.save_pretrained(lora_dir)
-    processor.save_pretrained(lora_dir)
-    print(f"  LoRA saved to: {lora_dir}")
+    # Save final weights — LoRA adapter or full merged, depending on mode
+    out_name = "merged" if args.full_finetune else "lora_final"
+    save_dir = os.path.join(args.output_dir, out_name)
+    model.save_pretrained(save_dir)
+    processor.save_pretrained(save_dir)
+    print(f"  {'full-FT weights' if args.full_finetune else 'LoRA'} saved to: {save_dir}")
 
     # === In-process source-domain held-out eval (APROCSA base vs LoRA) ===
     holdout_eval = {}
@@ -370,6 +385,35 @@ def main():
             print(f"  APROCSA held-out WER — AFTER only: {holdout_eval['after']['overall_wer']}")
 
     # === UASpeech cross-domain eval (secondary sanity check) ===
+    # Windows-only paths — skip on H100. `--skip-post-eval` short-circuits + writes
+    # the run_summary with just the holdout eval results.
+    per_sev_after: dict = {}
+    per_sev_before: dict = {}
+    eval_results: list = []
+    gt: dict = {}
+    if args.skip_post_eval:
+        print(f"\n[{time.strftime('%H:%M:%S')}] --skip-post-eval set; skipping UASpeech sweep", flush=True)
+        with open(os.path.join(args.output_dir, "run_summary.json"), "w", encoding="utf-8") as f:
+            json.dump({
+                "model_id": MODEL_ID,
+                "manifest": args.manifest,
+                "records": len(records),
+                "holdout_records": len(holdout_records),
+                "max_steps": args.max_steps,
+                "batch_size": args.batch_size,
+                "grad_accum": args.grad_accum,
+                "lora_r": args.lora_r,
+                "lora_alpha": args.lora_alpha,
+                "lr": args.lr,
+                "full_finetune": args.full_finetune,
+                "resume_from": args.resume_from,
+                "elapsed_s": elapsed,
+                "peak_vram_gb": peak,
+                "metrics": stats.metrics,
+                "aprocsa_holdout_eval": holdout_eval,
+            }, f, indent=2)
+        print(f"Saved run_summary (holdout-only) to {args.output_dir}/run_summary.json")
+        return
     # We run the SAME speaker x digit sweep as baseline_zeroshot_uaspeech.py,
     # avoiding the LoRA-reload audio patch bug by staying in this process.
     print(f"\n[{time.strftime('%H:%M:%S')}] running post-training eval ...", flush=True)
