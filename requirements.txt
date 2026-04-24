@@ -1,0 +1,24 @@
+# Pinned to compatibility with existing torch 2.5.1+cu124 on Windows 11, RTX A4000 (SM 8.6)
+# Install order matters — torch stays pinned, unsloth installs its own wheels from its index.
+
+# Core fine-tuning stack
+unsloth
+unsloth_zoo
+bitsandbytes>=0.43.0
+peft>=0.12.0
+trl>=0.11.0
+transformers>=4.45.0
+accelerate>=0.34.0
+datasets>=2.19.0
+
+# Audio
+soundfile
+librosa
+jiwer
+
+# Utilities
+numpy
+pandas
+tqdm
+regex
+pylangacq  # CHAT format parser, optional alternative to our regex parser

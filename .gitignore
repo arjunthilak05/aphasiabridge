@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Unsloth / HF / torch caches
+unsloth_compiled_cache/
+.hf_cache/
+.huggingface/
+huggingface/
+hub/
+
+# Training outputs — too big + regenerable
+outputs/
+
+# Data — large binary or regenerable
+data/aprocsa_clips/
+data/*.wav
+data/*.mp3
+data/*.mp4
+
+# Logs + scratch
+*.log
+nohup.out
+samples_nonascii.txt
+/tmp/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets — never commit
+.env
+.env.*
+*.pem
+*_token
+kaggle_token
