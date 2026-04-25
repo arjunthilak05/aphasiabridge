@@ -166,6 +166,9 @@ def main():
     ap.add_argument("--gradient-checkpointing", action="store_true",
                     help="Trade compute for activation memory (~10 GB savings, ~25%% slower). "
                          "Required for full-FT in DDP mode where each rank holds the full model.")
+    ap.add_argument("--optim", default="adamw_8bit",
+                    help="Optimizer name. 'adamw_8bit' default; use 'paged_adamw_8bit' for full-FT "
+                         "to page fp32 variance to CPU RAM (saves ~30 GB/GPU).")
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -278,7 +281,7 @@ def main():
             logging_steps=1,
             save_strategy="steps",
             save_steps=max(args.max_steps // 3, 10),
-            optim="adamw_8bit",
+            optim=args.optim,
             weight_decay=0.001,
             lr_scheduler_type="cosine",
             seed=3407,
