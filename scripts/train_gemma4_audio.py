@@ -72,6 +72,9 @@ def main():
     ap.add_argument("--max-length", type=int, default=2048)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--seed", type=int, default=3407)
+    ap.add_argument("--freeze-audio", action="store_true",
+                    help="Drop audio modules from target_modules. Adapts only the language path; "
+                         "audio encoder stays at strong pretrained weights. R1-Lang config.")
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -101,13 +104,17 @@ def main():
         random_state=args.seed,
         use_rslora=False,
         loftq_config=None,
-        target_modules=[
-            # Daniel Hanchen Gemma 3n notebook target_modules (4 audio modules only)
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj",
-            "post", "linear_start", "linear_end",
-            "embedding_projection",
-        ],
+        target_modules=(
+            # --freeze-audio: language-only LoRA (audio encoder stays at base weights)
+            ["q_proj", "k_proj", "v_proj", "o_proj",
+             "gate_proj", "up_proj", "down_proj"]
+            if args.freeze_audio else
+            # Default: Daniel Hanchen Gemma 3n notebook target_modules (+ 4 audio modules)
+            ["q_proj", "k_proj", "v_proj", "o_proj",
+             "gate_proj", "up_proj", "down_proj",
+             "post", "linear_start", "linear_end",
+             "embedding_projection"]
+        ),
         # Critical: lm_head + embed_tokens fully trained. embed_audio NOT included
         # because Gemma 4's modeling_gemma4.py:2329 calls it with kwarg
         # `inputs_embeds=` and PEFT's AuxiliaryTrainingWrapper requires positional.
