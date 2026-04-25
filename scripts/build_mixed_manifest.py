@@ -1,20 +1,19 @@
-"""Task 2 — TED-LIUM + AphasiaBank mixed manifest builder.
+"""Task 2 — LibriSpeech + AphasiaBank mixed manifest builder.
 
 Implements the mixing strategy from arXiv:2506.06566 (AS-ASR): pure aphasia
 training lets the language prior collapse onto canonical task scripts; mixing
-fluent English (TED-LIUM) anchors normal vocabulary while still teaching
-aphasic patterns. They saw substantial gains on Whisper-Tiny going from
-AphasiaBank-only to TED-LIUM + AphasiaBank.
+fluent English anchors normal vocabulary while still teaching aphasic
+patterns. They used TED-LIUM. We use LibriSpeech (`openslr/librispeech_asr`
+clean train-100) instead — TED-LIUM is no longer on HF Hub
+(LIUM/tedlium → 404). Same hypothesis: fluent English anchors the language prior.
 
 Pipeline:
-  1. Stream LIUM/tedlium release3 from HuggingFace.
-  2. Filter: dur ∈ [0.5, 30] s, word_count ≥ 2, no `<unk>`, no empty text.
-  3. Save 16 kHz mono WAVs to /data/kl_dev/dataset_wan/data_gemma/tedlium/clips/
-  4. Subsample to ~7.4 hours of audio (matching aphasia paper-filter).
-  5. Emit JSONL rows in the same shape as aphasiabank_si_train.jsonl
-     (audio_path, transcript, severity="control", duration_ms, ...).
-  6. Write `aphasiabank_si_train_mixed.jsonl` = aphasia + TED-LIUM
-     interleaved (50/50 by hours).
+  1. Stream openslr/librispeech_asr config "clean" split "train.100" from HF.
+  2. Filter: dur ∈ [0.5, 30] s, word_count ≥ 2, no empty text.
+  3. Save 16 kHz mono WAVs.
+  4. Subsample to ~7.4 hours (matching aphasia paper-filter).
+  5. Emit JSONL rows in the same shape as aphasiabank_si_train.jsonl.
+  6. Write the combined mixed manifest interleaved (50/50 by hours).
 
 Output:
   $APHASIA_ROOT/../tedlium/clips/<id>.wav        (TED-LIUM wavs)
@@ -35,9 +34,9 @@ def main():
     ap.add_argument("--aphasia-manifest", required=True,
                     help="Path to aphasiabank_si_train.jsonl")
     ap.add_argument("--out-clips-dir", required=True,
-                    help="Where to save TED-LIUM WAVs (separate dir, not under aphasiabank/)")
+                    help="Where to save fluent-corpus WAVs (separate dir, not under aphasiabank/)")
     ap.add_argument("--out-tedlium-manifest", required=True,
-                    help="Output path for TED-LIUM-only manifest")
+                    help="Output path for fluent-corpus-only manifest (kept name for compat)")
     ap.add_argument("--out-mixed-manifest", required=True,
                     help="Output path for the combined mixed manifest")
     ap.add_argument("--target-hours", type=float, default=None,
@@ -60,21 +59,19 @@ def main():
     out_clips = Path(args.out_clips_dir)
     out_clips.mkdir(parents=True, exist_ok=True)
 
-    # --- Stream TED-LIUM release3 -----------------------------------------
-    print(f"[{time.strftime('%H:%M:%S')}] streaming LIUM/tedlium release3 train split ...", flush=True)
-    ds = load_dataset("LIUM/tedlium", "release3", split="train", streaming=True)
+    # --- Stream LibriSpeech (clean, train-100) ----------------------------
+    print(f"[{time.strftime('%H:%M:%S')}] streaming openslr/librispeech_asr clean train.100 ...", flush=True)
+    ds = load_dataset("openslr/librispeech_asr", "clean", split="train.100", streaming=True)
 
-    tedlium_rows = []
+    fluent_rows = []
     accumulated_s = 0.0
     n_seen = n_dropped = 0
 
-    # Stream the FIRST N clips that pass filters (deterministic).
-    # We stop once we have enough hours.
+    # Stream rows until we hit the target hours.
     for ex in ds:
         n_seen += 1
         text = (ex.get("text") or "").strip().lower()
-        # Filter: empty / <unk> / contains weird tokens
-        if not text or "<unk>" in text or text.startswith("ignore_time_segment"):
+        if not text:
             n_dropped += 1; continue
         words = text.split()
         if len(words) < 2:
@@ -85,16 +82,13 @@ def main():
         dur_s = arr.shape[0] / sr if sr else 0.0
         if dur_s < 0.5 or dur_s > 30.0:
             n_dropped += 1; continue
-
-        # Resample if needed (TED-LIUM is 16 kHz already)
         if sr != 16000:
-            n_dropped += 1; continue   # skip rather than risk lossy resample on the fly
+            n_dropped += 1; continue
 
-        # Save WAV
-        clip_id = f"tedlium_{n_seen:07d}"
+        clip_id = f"librispeech_{n_seen:07d}"
         wav_path = out_clips / f"{clip_id}.wav"
         sf.write(wav_path, arr, 16000, subtype="PCM_16")
-        tedlium_rows.append({
+        fluent_rows.append({
             "audio_path": str(wav_path),
             "clip_path":  str(wav_path),
             "transcript": text,
@@ -103,12 +97,13 @@ def main():
             "transcript_clean": text,
             "duration_ms": int(round(dur_s * 1000)),
             "word_count": len(words),
-            "participant_id": (ex.get("speaker_id") or f"tedlium_speaker_{n_seen:07d}"),
+            "participant_id": (str(ex.get("speaker_id")) if ex.get("speaker_id") is not None
+                               else f"librispeech_speaker_{n_seen:07d}"),
             "severity": "control",
-            "corpus": "TED-LIUM-3",
-            "folder": "TED",
+            "corpus": "LibriSpeech-clean-100",
+            "folder": "LibriSpeech",
             "condition": "control",
-            "source": "tedlium",
+            "source": "librispeech",
             "session_wav": str(wav_path),
             "aphasia_type": None, "qab_overall": None,
             "has_paraphasia_marker": False,
@@ -116,23 +111,23 @@ def main():
             "utt_index": n_seen, "start_ms": 0, "end_ms": int(round(dur_s * 1000)),
         })
         accumulated_s += dur_s
-        if (len(tedlium_rows)) % 250 == 0:
-            print(f"  [{time.strftime('%H:%M:%S')}] kept {len(tedlium_rows)} clips / "
+        if (len(fluent_rows)) % 250 == 0:
+            print(f"  [{time.strftime('%H:%M:%S')}] kept {len(fluent_rows)} clips / "
                   f"{accumulated_s/3600:.2f} h (target {target_h:.2f} h); seen={n_seen} dropped={n_dropped}",
                   flush=True)
         if accumulated_s >= target_s:
             break
 
-    print(f"\n[{time.strftime('%H:%M:%S')}] TED-LIUM done. kept={len(tedlium_rows)} "
+    print(f"\n[{time.strftime('%H:%M:%S')}] LibriSpeech done. kept={len(fluent_rows)} "
           f"({accumulated_s/3600:.3f} h); seen={n_seen} dropped={n_dropped}", flush=True)
 
     # --- Write outputs ----------------------------------------------------
     with open(args.out_tedlium_manifest, "w") as f:
-        for r in tedlium_rows:
+        for r in fluent_rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     print(f"  wrote {args.out_tedlium_manifest}")
 
-    mixed = aphasia[:] + tedlium_rows
+    mixed = aphasia[:] + fluent_rows
     rng.shuffle(mixed)
     with open(args.out_mixed_manifest, "w") as f:
         for r in mixed:
@@ -141,7 +136,7 @@ def main():
     print(f"  wrote {args.out_mixed_manifest}  ({len(mixed)} clips / {mixed_h:.2f} h)")
 
     print(f"\n  aphasia: {len(aphasia)} clips / {aphasia_h:.2f} h")
-    print(f"  TED-LIUM: {len(tedlium_rows)} clips / {accumulated_s/3600:.2f} h")
+    print(f"  fluent:  {len(fluent_rows)} clips / {accumulated_s/3600:.2f} h")
     print(f"  mixed:   {len(mixed)} clips / {mixed_h:.2f} h")
 
 
