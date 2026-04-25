@@ -44,13 +44,24 @@ def main():
     ap.add_argument("--no-repeat-ngram", type=int, default=4)
     ap.add_argument("--max-new-tokens", type=int, default=200)
     ap.add_argument("--num-beams", type=int, default=1)
+    ap.add_argument("--length-penalty", type=float, default=1.0,
+                    help="Beam search length penalty (>1 favors longer; <1 favors shorter). 0.6 kills hallucinated continuations.")
     ap.add_argument("--max-length", type=int, default=2048)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--dump-tracebacks", type=int, default=3,
                     help="Print full traceback for first N failing clips")
     ap.add_argument("--skip-base", action="store_true",
                     help="Skip BASE (LoRA-disabled) eval pass")
+    ap.add_argument("--system-prompt", default=None,
+                    help="Override SYSTEM_PROMPT. Default: 'You are an assistant that transcribes speech accurately.'")
+    ap.add_argument("--user-prompt", default=None,
+                    help="Override USER_PROMPT. Default: 'Please transcribe this audio.'")
+    ap.add_argument("--no-system-prompt", action="store_true",
+                    help="Drop the system prompt entirely (Lever-4 variant 5).")
     args = ap.parse_args()
+    # Apply prompt overrides
+    sys_prompt = SYSTEM_PROMPT if args.system_prompt is None else args.system_prompt
+    usr_prompt = USER_PROMPT   if args.user_prompt   is None else args.user_prompt
 
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -101,15 +112,15 @@ def main():
                     outs.append({"ref": r["transcript"], "hyp": "<ERROR:bad_sr>",
                                  "severity": r.get("severity")})
                     continue
-                messages = [
-                    {"role": "system",
-                     "content": [{"type": "text", "text": SYSTEM_PROMPT}]},
-                    {"role": "user",
-                     "content": [
-                         {"type": "audio", "audio": audio},
-                         {"type": "text",  "text": USER_PROMPT},
-                     ]},
-                ]
+                messages = []
+                if not args.no_system_prompt:
+                    messages.append({"role": "system",
+                                     "content": [{"type": "text", "text": sys_prompt}]})
+                messages.append({"role": "user",
+                                 "content": [
+                                     {"type": "audio", "audio": audio},
+                                     {"type": "text",  "text": usr_prompt},
+                                 ]})
                 inputs = processor.apply_chat_template(
                     messages, add_generation_prompt=True, tokenize=True,
                     return_dict=True, return_tensors="pt",
@@ -123,6 +134,7 @@ def main():
                     repetition_penalty=args.rep_penalty,
                     no_repeat_ngram_size=args.no_repeat_ngram,
                     num_beams=args.num_beams,
+                    length_penalty=args.length_penalty,
                 )
                 with torch.no_grad():
                     out = model.generate(**inputs, **gen_kwargs)
@@ -208,8 +220,8 @@ def main():
                 "num_beams": args.num_beams,
             },
             "result": result,
-            "after_raw": after_outs[:50],   # save first 50 to inspect
-            "base_raw": (base_outs[:50] if base_outs else None),
+            "after_raw": after_outs,   # all predictions for downstream WER recompute
+            "base_raw": (base_outs if base_outs else None),
         }, f, indent=2)
     print(f"\n  Saved {out_path}")
 
