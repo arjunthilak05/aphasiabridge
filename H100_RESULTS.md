@@ -104,8 +104,10 @@ eval_with_lora.py            parse_aprocsa_cha.py             run_aprocsa_pipeli
 | R1'' (Unsloth canon) | 2000 | 8 (4×2) | 16 / 32 | 5e-5 | paper si_train (3.96K, 7.40 h) | 32 min | 3.197 | **0.558 → 0.556** | **null (no win)** |
 | R1''-strong | 5000 | 8 (4×2) | 32 / 64 | 1e-4 | paper si_train | killed at step 280 | – | – | **killed (wrong recipe)** |
 | R1''-whisper | 7500 | 16 (8×2) | 16 / 32 | 1e-5 | paper si_train | killed before training | – | – | **killed (wrong recipe)** |
-| R2 (full-FT, attempt 5) | 1500 | 8 (1×8) | – (full) | 3e-5 | paper si_train | running (688/1500) | – | – | 🏃 |
-| **R1-D (Daniel recipe)** | 1 epoch | **2 (2×1)** | **8 / 16** | 5e-5 | paper si_train | running | – | – | 🏃 |
+| **R2** (full-FT, adafactor) | 1500 | 8 (1×8) | – (full) | 3e-5 | paper si_train | 47 min | 2.400 | **(BASE skipped) → 4.123** | **❌ collapsed** — 49 % repeat loops; full-FT couldn't fix broken AssistantOnly collator |
+| R1-D (Daniel recipe v1) | – | – | 8 / 16 | 5e-5 | – | crashed step 0 | – | – | ❌ `embed_audio` PEFT wrapper TypeError |
+| R1-D2 (drop embed_audio) | – | – | 8 / 16 | 5e-5 | – | crashed step 0 | – | – | ❌ "Audio features 483840 vs tokens 190" — Daniel's custom collator |
+| **R1-D3** (Daniel + UnslothVisionDataCollator) | 1485 (3 epochs) | 8 (2×4) | 16 / 16 | 2e-4 | paper si_train | 42 min | **0.879** | **0.556 → 2.093** | 🟡 **partial — recipe finally trains** but over-fit memorized "the the the" attractor |
 
 ---
 
@@ -329,30 +331,139 @@ bs=2 grad_accum=1, weight_decay=0.01, warmup_ratio=0.1, max_length=2048,
 
 `train_gemma4_lora.py` is preserved for the older path (and for full-FT R2).
 
-### R1-D launch
-Currently running on GPU 3 (PID 3641820). The diagnostic to watch:
-**does loss drop to ~0.5–1.0 in the first 50–100 steps?** If yes, the
-`modules_to_save`/collator gap was the missing piece and we have a working
-Gemma 4 audio LoRA path. If no, the issue is deeper.
+### R1-D launch trail (3 attempts before it ran)
+
+| Attempt | Change | Result |
+|---|---|---|
+| R1-D (v1) | Daniel's verbatim recipe with `modules_to_save=[lm_head, embed_tokens, embed_audio]` and his custom `processor()` collator | `TypeError: AuxiliaryTrainingWrapper.forward() missing 1 required positional argument: 'x'`. Gemma 4's `modeling_gemma4.py:2329` calls `self.embed_audio(inputs_embeds=...)` with a keyword arg; PEFT's wrapper for `modules_to_save` requires positional. Daniel's notebook targets Gemma 3n which has a different calling convention. |
+| R1-D2 | Drop `embed_audio` from `modules_to_save`; keep `[lm_head, embed_tokens]` | `ValueError: Audio features and audio tokens do not match, tokens: 190, features: 483840`. Daniel's custom `processor(text=, audio=)` collator doesn't emit Gemma 4's required `token_type_ids` / `mm_token_type_ids` tensors, so the audio↔token alignment check at `modeling_gemma4.py:2249` aborts. |
+| **R1-D3** | Same as R1-D2 + replace custom collator with `UnslothVisionDataCollator(model, processor)` (Gemma 4 native) | **Trained successfully.** Loss 8.7 → 0.88 over 1485 steps. WER 0.556 → 2.093 — partial collapse, but for the first time in this whole project the model **actually learned to use audio**. |
 
 ---
 
-## K. Concurrent run state (snapshot at log update)
+## K. R2 — full-FT — collapsed despite working pipeline
 
-| Run | GPU | Recipe | Status | ETA |
-|---|---|---|---|---|
-| **R2** (full-FT attempt 5) | 1 | single H100, adafactor, bs=1 acc=8, lr=3e-5, 1500 steps | step 688 / 1500 | ~25 min |
-| **R1-D** (Daniel recipe) | 3 | r=8 α=16, lr=5e-5, modules_to_save=[lm_head,embed_tokens,embed_audio], 1 epoch on 3956 clips | running | ~50 min (TBD) |
+47 min, peak VRAM 76.78 GB (close to the H100 ceiling). Final train loss 2.40
+— mid-training reached 1.35 but cosine LR tail dragged it back up.
 
-### Other runs killed (broken recipes, won't retry without changes)
-- R1''-strong (r=32 lr=1e-4 5000 steps) — killed at step 280
-- R1''-whisper (lr=1e-5 7500 steps eff batch 16 warmup 0.1) — killed before training started
+```
+WER: BASE not measured (Phase A: disable_adapter() doesn't exist on full-FT
+     models, so script skipped it. Use R1''/R1-D3's BASE = 0.558 / 0.556 on
+     the same 220 clips for comparison.)
+WER AFTER: 4.123
 
-### Free GPUs (not currently in use): 2, 4 (724 MB residual), 5, 6 (868 MB residual)
+Per-severity AFTER: mild=4.083  moderate=4.227  unknown=4.153
+
+Failure modes (220 clips):
+   107 repetition loops "the the the the..."  (49 %)
+    11 protocol hallucinations
+    24 audio-processor errors (pre-existing data issue)
+```
+
+**Why R2 collapsed even with 8 B trainable params:** R2 used the OLD pipeline
+(`train_gemma4_lora.py` with `UnslothVisionDataCollator` + our
+`AssistantOnlyLossCollator` wrapper). The collator masks loss to
+assistant-tokens-only — that masking + a tiny dataset pushes the model toward
+"emit canonical English regardless of audio". Full fine-tune just gave the
+collapse more degrees of freedom; it didn't fix it.
+
+**Conclusion: the pipeline bug isn't LoRA capacity. It's our
+`AssistantOnlyLossCollator` wrap.** R1-D3 dropped that wrap (loss flows on
+prompt+answer like Daniel's recipe) and was the first run to show genuine
+audio-aware predictions.
 
 ---
 
-## L. Commits on `h100-run-1` (chronological)
+## L. R1-D3 — first run that actually trains
+
+**Configuration**
+```
+target_modules = ["q_proj","k_proj","v_proj","o_proj",
+                  "gate_proj","up_proj","down_proj",
+                  "post","linear_start","linear_end","embedding_projection"]
+modules_to_save = ["lm_head", "embed_tokens"]
+r=16 alpha=16 dropout=0
+lr=2e-4 warmup_ratio=0.1 weight_decay=0.01
+3 epochs × bs=2 grad_accum=4 = 1485 steps
+data_collator = UnslothVisionDataCollator(model, processor)   # NO assistant-only wrapper
+manifest = aphasiabank_si_train.jsonl  (3,956 clips, 7.40 h)
+```
+
+**Result**
+```
+elapsed: 42 min   peak VRAM: 27 GB
+final train loss: 0.879           ← 8× better than R1''/R2 stuck at 3.2 / 2.4
+trainable params: 1,386,074,112 / 9,382,230,560 (14.77 %)  ← 140× R1''
+
+Held-out WER  BASE: 0.556  AFTER: 2.093   delta +1.537
+Per-severity:  mild  0.557 → 1.625
+               moderate 0.649 → 3.805
+               unknown 0.422 → 1.778
+```
+
+**Audio-aware predictions (first time in this project!)**
+
+| Clip | REF | AFTER (R1-D3) | Status |
+|---|---|---|---|
+| [1] | `"it's the this aunt aunt sister sister"` | `"the aunt the sister"` | ✅ audio-aware |
+| [4] | `"and it's come waste your time with me"` | `"and it's like time waste your time with me"` | ✅ audio-aware |
+| [0] | `"all the this lad or son football broke windows windows"` | `"and the the the the…"` | ❌ repeat loop |
+| [2] | `"a a a knife knife knife"` | `"i've i've i've i've…"` | ❌ repeat loop |
+
+**Diagnosis: lr=2e-4 + 3 epochs over-fit the small dataset.** Loss 0.88 means
+the model fits training data well; on 3,956 clips that means memorizing two
+attractors:
+- "real transcription" when input matches training distribution (samples [1],
+  [4])
+- "the the the…" filler when input is hard / OOD (samples [0], [2])
+
+Failure-mode breakdown:
+- Repeat loops: **15 / 220 (7 %)** — vs R2: 107 (49 %), R1: 164 (40 %)
+- Protocol hallucinations: **9 / 220 (4 %)** — vs R1: 136 (33 %)
+- Audio errors: 24 / 220 (pre-existing; same in BASE and AFTER)
+
+**Two of three R1-era failure modes are largely solved.** The remaining
+issue is over-training on a small dataset, not collapse.
+
+---
+
+## M. Recipe convergence — what works on Gemma 4 audio LoRA
+
+After 7 training attempts, the working recipe (R1-D3) has these
+non-negotiable features:
+
+| Component | Required value | Why |
+|---|---|---|
+| Model loader | `FastModel.from_pretrained` (load_in_4bit=True) | Unsloth canonical |
+| Audio target_modules | exactly 4: `post`, `linear_start`, `linear_end`, `embedding_projection` | Daniel Hanchen's verified Gemma 3n list — extra modules (`ffw_layer_*`, `output_proj`, `relative_k_proj`) destabilize |
+| `modules_to_save` | `[lm_head, embed_tokens]` | Adds 1.4 B trainable params (vs R1''s 10 M). Critical for actual learning. **Don't include `embed_audio`** — Gemma 4's kwarg call breaks PEFT's wrapper |
+| Data collator | `UnslothVisionDataCollator(model, processor)` direct, **no** `AssistantOnlyLossCollator` wrap | Gemma 4 needs `token_type_ids` + `mm_token_type_ids` which the Unsloth collator emits; assistant-only loss masking causes generic-English collapse |
+| `remove_unused_columns` | `False` | Required for multimodal tensors to survive HF dataset preprocessing |
+| `dataset_kwargs` | `{"skip_prepare_dataset": True}` | Tell SFTTrainer not to re-tokenize |
+| `weight_decay` | `0.01` | Daniel's value (we had 0.001 — too low) |
+| `warmup_ratio` | `0.1` | Daniel's value |
+| LR | **5e-5 still TBD; 2e-4 over-fits** | R1-D3 with 2e-4 over-trained. R1''/Unsloth-canon was 5e-5 but didn't have `modules_to_save`. R1-D4 will test 5e-5 + the new modules_to_save. |
+
+---
+
+## N. Pending — R1-D4 (Daniel's exact hyperparams)
+
+| Param | R1-D3 (just done) | R1-D4 (proposed) |
+|---|---|---|
+| LR | 2e-4 | **5e-5** (4× lower; matches Daniel's actual notebook, not the 2e-4 I used in R1-D3) |
+| Epochs | 3 | **1** (vs Daniel's actual 1) |
+| r / α | 16 / 16 | **8 / 16** (Daniel's, alpha=2r effective scale 2.0) |
+| bs / accum | 2 / 4 (eff 8) | **2 / 1 (eff 2)** — Daniel's exact |
+| Everything else | unchanged from R1-D3 |
+
+Wall: ~15 min. Tests whether **lower LR + fewer epochs kills the
+memorization**. If R1-D4 lands ≤ 0.45 WER, we have a working baseline and can
+proceed to R2-D (full-FT with the corrected collator — actual fix for R2's
+collapse).
+
+---
+
+## O. Commits on `h100-run-1` (chronological)
 
 1. **§7 patches** — `--skip-post-eval`, `--resume-from`, `--full-finetune`, `--severity-only`
 2. **R1 collapse documentation** + `results/r1_lora_big_FAILED.json`
@@ -363,21 +474,31 @@ Gemma 4 audio LoRA path. If no, the issue is deeper.
 7. **`--gradient-checkpointing`** flag for full-FT memory
 8. **`--optim`** flag (adamw_8bit / paged_adamw_8bit / adafactor)
 9. **`--warmup-ratio`** flag (HF Whisper blog uses 0.10)
-10. **`scripts/train_gemma4_audio.py`** — Daniel Hanchen recipe verbatim
+10. **`scripts/train_gemma4_audio.py` v1** — Daniel Hanchen recipe verbatim
+11. **R1-D crash fix** — drop `embed_audio` from `modules_to_save` (PEFT wrapper kwarg incompatibility) + full A→Z log update
+12. **`train_gemma4_audio.py` v2** — switch to `UnslothVisionDataCollator` (Gemma 4 token_type_ids fix) + `modules_to_save=[lm_head, embed_tokens]` + Daniel's other hyperparams
 
 ---
 
-## M. Pending items (after R2 + R1-D land)
+## P. Pending items
 
-1. Update this doc with R2 + R1-D WER tables.
+1. Update this doc with R1-D4 result when it runs.
 2. Push `h100-run-1` to `arjunthilakeros/aphasiabridge` on GitHub once GH auth
    is resolved (currently `gh auth status` says token invalid; need PAT or
    `gh auth login -h github.com` interactively).
 3. Upload final LoRA / merged weights to `Arjunthilak/aphasiabridge-gemma4-e4b-*`
    on HF Hub (auth verified, `repo.write` scope confirmed).
-4. Investigate the 24/220 `ValueError`s in the eval (consistent across BASE +
-   AFTER, so it's a data issue not a model issue).
-5. If R1-D works, decide whether to: (a) extend training to 2-3 epochs;
-   (b) increase LoRA r to 16/32; (c) move to R3 curriculum (mild → moderate
-   → severe); (d) try APROCSA + synthetic augmentation per CONTINGENCY.md
-   Strategy C.
+4. Investigate the 24/220 `<ERROR:ValueError>`s in the eval (consistent across
+   BASE + AFTER, so it's a data issue inflating both numerators — fix would
+   raise both numbers but make the comparison fairer).
+5. If R1-D4 lands ≤ 0.45 WER:
+   - Run **R2-D**: full-FT with the *corrected* collator (drop AssistantOnly
+     wrap from `train_gemma4_lora.py`, keep `modules_to_save=[lm_head, embed_tokens]`).
+     Should reach paper-grade WER if data is sufficient.
+   - Try APROCSA + synthetic augmentation per CONTINGENCY.md Strategy C to
+     scale data beyond 7.40 h.
+   - Move to R3 curriculum (mild → moderate → severe) for severity balance.
+6. If R1-D4 also memorizes / over-fits, the data is too small for Gemma 4 audio
+   to learn meaningfully. Pivot to: APROCSA + synthetic data scale-up (~30 h
+   target), or fall back to CONTINGENCY.md Strategy A (Whisper front-end +
+   Gemma text intent).
