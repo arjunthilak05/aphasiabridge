@@ -298,17 +298,29 @@ def main():
     elapsed = time.time() - t0
     peak = torch.cuda.max_memory_reserved() / 1e9
 
-    print(f"\n=== done ===")
-    print(f"  elapsed:          {elapsed/60:.1f} min ({elapsed:.1f}s)")
-    print(f"  peak VRAM:        {peak:.2f} GB")
-    print(f"  final train loss: {stats.metrics.get('train_loss')}")
+    # Under DDP/accelerate launch, only rank 0 should print + save + eval.
+    # Single-GPU runs have LOCAL_RANK unset, so this is a no-op there.
+    is_main = int(os.environ.get("LOCAL_RANK", 0)) == 0
+
+    if is_main:
+        print(f"\n=== done ===")
+        print(f"  elapsed:          {elapsed/60:.1f} min ({elapsed:.1f}s)")
+        print(f"  peak VRAM:        {peak:.2f} GB")
+        print(f"  final train loss: {stats.metrics.get('train_loss')}")
 
     # Save final weights — LoRA adapter or full merged, depending on mode
+    # All ranks must call save_pretrained for trainer's internal collective sync;
+    # but only rank 0 writes the final files (HF trainer handles this).
     out_name = "merged" if args.full_finetune else "lora_final"
     save_dir = os.path.join(args.output_dir, out_name)
-    model.save_pretrained(save_dir)
-    processor.save_pretrained(save_dir)
-    print(f"  {'full-FT weights' if args.full_finetune else 'LoRA'} saved to: {save_dir}")
+    if is_main:
+        model.save_pretrained(save_dir)
+        processor.save_pretrained(save_dir)
+        print(f"  {'full-FT weights' if args.full_finetune else 'LoRA'} saved to: {save_dir}")
+
+    # Post-train eval is single-GPU only — short-circuit on non-main ranks.
+    if not is_main:
+        return
 
     # === In-process source-domain held-out eval (APROCSA base vs LoRA) ===
     holdout_eval = {}
