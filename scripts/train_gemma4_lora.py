@@ -169,6 +169,8 @@ def main():
     ap.add_argument("--optim", default="adamw_8bit",
                     help="Optimizer name. 'adamw_8bit' default; use 'paged_adamw_8bit' for full-FT "
                          "to page fp32 variance to CPU RAM (saves ~30 GB/GPU).")
+    ap.add_argument("--warmup-ratio", type=float, default=0.03,
+                    help="Fraction of steps used for LR warmup. HF Whisper blog uses 0.10.")
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -275,7 +277,7 @@ def main():
         args=SFTConfig(
             per_device_train_batch_size=args.batch_size,
             gradient_accumulation_steps=args.grad_accum,
-            warmup_ratio=0.03,
+            warmup_ratio=args.warmup_ratio,
             max_steps=args.max_steps,
             learning_rate=args.lr,
             logging_steps=1,
