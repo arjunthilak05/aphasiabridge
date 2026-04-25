@@ -1,0 +1,44 @@
+{
+  "model_id": "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit",
+  "manifest": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_train_v2_50k.jsonl",
+  "records": 39690,
+  "holdout_records": 414,
+  "max_steps": 5000,
+  "batch_size": 4,
+  "grad_accum": 4,
+  "lora_r": 64,
+  "lora_alpha": 128,
+  "lr": 0.0002,
+  "full_finetune": false,
+  "resume_from": null,
+  "elapsed_s": 8545.263419866562,
+  "peak_vram_gb": 14.797504512,
+  "metrics": {
+    "train_runtime": 8544.0741,
+    "train_samples_per_second": 9.363,
+    "train_steps_per_second": 0.585,
+    "total_flos": 1.3080703319717376e+17,
+    "train_loss": 3.0115077738285065,
+    "epoch": 2.0153179482011487
+  },
+  "aprocsa_holdout_eval": {
+    "after": {
+      "overall_wer": 5.127,
+      "per_severity_wer": {
+        "severe": 5.042,
+        "mild": 3.761,
+        "moderate": 7.091,
+        "very_severe": 6.083
+      }
+    },
+    "base": {
+      "overall_wer": 0.657,
+      "per_severity_wer": {
+        "severe": 0.645,
+        "mild": 0.529,
+        "moderate": 0.752,
+        "very_severe": 0.974
+      }
+    }
+  }
+}
