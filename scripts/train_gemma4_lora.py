@@ -143,9 +143,10 @@ def main():
     ap.add_argument("--max-steps", type=int, default=30)
     ap.add_argument("--batch-size", type=int, default=1)
     ap.add_argument("--grad-accum", type=int, default=8)
-    ap.add_argument("--lora-r", type=int, default=8)
-    ap.add_argument("--lora-alpha", type=int, default=16)
-    ap.add_argument("--lr", type=float, default=5e-5)
+    ap.add_argument("--lora-r", type=int, default=16)         # Unsloth audio recipe: 8-32 range
+    ap.add_argument("--lora-alpha", type=int, default=32)     # alpha = 2*r per Unsloth note
+    ap.add_argument("--lora-dropout", type=float, default=0.0) # Unsloth audio notebook uses 0
+    ap.add_argument("--lr", type=float, default=5e-5)         # Unsloth audio default; NOT 2e-4
     ap.add_argument("--max-seq-length", type=int, default=4096)
     ap.add_argument("--limit", type=int, default=None, help="Cap number of records for quick tests")
     ap.add_argument("--holdout-frac", type=float, default=0.0,
@@ -187,23 +188,23 @@ def main():
             finetune_mlp_modules=True,
             r=args.lora_r,
             lora_alpha=args.lora_alpha,
-            lora_dropout=0.1,                      # Unsloth-recommended for Gemma 3/4
+            lora_dropout=args.lora_dropout,
             bias="none",
             random_state=3407,
             use_rslora=False,
             loftq_config=None,
+            # Verbatim target_modules from official Unsloth Gemma4_(E4B)-Audio.ipynb
+            # (cell 18). Two prior runs that used a hand-crafted v2 list with
+            # `.linear` suffix collapsed catastrophically (WER 0.66 -> 5.13 / 3.02);
+            # the model learned the language prior and stopped attending to audio.
             target_modules=[
-                # --- language tower (42 decoder layers x 7 proj types) ---
                 "q_proj", "k_proj", "v_proj", "o_proj",
                 "gate_proj", "up_proj", "down_proj",
-                # --- audio encoder (USM-style audio_tower, 30 blocks) ---
-                # Inner Linear sits inside wrappers: feed_forwardN.ffw_layer_M.linear
-                "ffw_layer_1.linear",
-                "ffw_layer_2.linear",
-                "relative_k_proj",        # relative-position attention (12 instances)
-                "input_proj_linear",      # audio input projection
-                "output_proj",            # audio output projection
-                "embedding_projection",   # audio embedding projection
+                # Audio layers (Unsloth canonical list)
+                "post", "linear_start", "linear_end",
+                "embedding_projection",
+                "ffw_layer_1", "ffw_layer_2",
+                "output_proj",
             ],
         )
     else:
