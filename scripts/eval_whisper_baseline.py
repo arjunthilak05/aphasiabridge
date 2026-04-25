@@ -40,6 +40,12 @@ def main():
     ap.add_argument("--holdout", required=True)
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--rep-penalty", type=float, default=1.0,
+                    help="Repetition penalty. >1 discourages repeats. Whisper default 1.0.")
+    ap.add_argument("--no-repeat-ngram", type=int, default=0,
+                    help="No-repeat-ngram size. 0 disables (Whisper default). 4 is aggressive.")
+    ap.add_argument("--length-penalty", type=float, default=1.0,
+                    help="Beam search length penalty. <1 favors shorter outputs.")
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -69,13 +75,17 @@ def main():
             inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
             input_features = inputs.input_features.to("cuda", dtype=torch.float16)
             with torch.no_grad():
-                pred = model.generate(
-                    input_features,
+                gen_args = dict(
                     forced_decoder_ids=forced_decoder_ids,
                     max_new_tokens=256,
-                    num_beams=5,           # paper used beam=5
+                    num_beams=5,
                     do_sample=False,
+                    repetition_penalty=args.rep_penalty,
+                    length_penalty=args.length_penalty,
                 )
+                if args.no_repeat_ngram and args.no_repeat_ngram > 0:
+                    gen_args["no_repeat_ngram_size"] = args.no_repeat_ngram
+                pred = model.generate(input_features, **gen_args)
             text = processor.batch_decode(pred, skip_special_tokens=True)[0].strip()
         except Exception as e:
             if n_errors < 3:
