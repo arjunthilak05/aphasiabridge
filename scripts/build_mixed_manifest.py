@@ -24,9 +24,10 @@ from __future__ import annotations
 import argparse, json, os, random, sys, time
 from pathlib import Path
 
+import io
 import numpy as np
 import soundfile as sf
-from datasets import load_dataset
+from datasets import load_dataset, Audio
 
 
 def main():
@@ -60,8 +61,10 @@ def main():
     out_clips.mkdir(parents=True, exist_ok=True)
 
     # --- Stream LibriSpeech (clean, train-100) ----------------------------
-    print(f"[{time.strftime('%H:%M:%S')}] streaming openslr/librispeech_asr clean train.100 ...", flush=True)
+    # Side-step torchcodec by getting raw bytes (decode=False) and using soundfile.
+    print(f"[{time.strftime('%H:%M:%S')}] streaming openslr/librispeech_asr clean train.100 (decode=False) ...", flush=True)
     ds = load_dataset("openslr/librispeech_asr", "clean", split="train.100", streaming=True)
+    ds = ds.cast_column("audio", Audio(decode=False))
 
     fluent_rows = []
     accumulated_s = 0.0
@@ -77,8 +80,14 @@ def main():
         if len(words) < 2:
             n_dropped += 1; continue
         audio = ex["audio"]
-        arr = np.asarray(audio["array"], dtype=np.float32)
-        sr = int(audio["sampling_rate"])
+        # decode=False yields {"bytes": ..., "path": ...}
+        try:
+            arr, sr = sf.read(io.BytesIO(audio["bytes"]), dtype="float32")
+        except Exception:
+            n_dropped += 1; continue
+        if arr.ndim > 1:
+            arr = arr.mean(axis=1)  # mono
+        sr = int(sr)
         dur_s = arr.shape[0] / sr if sr else 0.0
         if dur_s < 0.5 or dur_s > 30.0:
             n_dropped += 1; continue
