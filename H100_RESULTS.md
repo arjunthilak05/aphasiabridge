@@ -59,10 +59,69 @@ Branch: `h100-run-1`. Started 2026-04-24 18:33 UTC.
 
 The 50K subsample at cap=80 over-represents speakers who completed multiple Protocol elicitation tasks (Cinderella retelling, Sandwich-making, Stroke-story). With effective batch 16 and 5000 steps × ~80,000 examples seen, the language head learned canonical task-script priors strong enough to override audio. **Loss kept dropping because canonical English has low cross-entropy.**
 
-## R1' — Run-3 recipe replication (in progress)
+## R1' — Run-3 recipe replication — also collapsed
 
-Goal: validate whether the v2 recipe (3000 steps × eff-batch 8 × r=32 α=64 × 25K cap-30) — which Run 3 was running successfully on A4000 at the time the project was paused — works at all on H100.
+Same recipe as Run 3 (3000 steps × eff-batch 8 × r=32 α=64 × 25K cap-30). Final loss 3.175. **Holdout WER 0.657 → 3.023** — same failure mode as R1, milder magnitude. 59 repetition loops + 68 protocol hallucinations / 414. Different audio yields the same canonical AphasiaBank-protocol output (e.g., audio of `'yeah yeah'` produces `"i'm gonna go to the bathroom"` — Sandwich-task hallucination).
 
-If R1' lands at WER ≤ 0.55 overall, R2 (full-FT) and R3 (curriculum) get scaled from the same conservative base.
+**Conclusion: hyperparams are not the bug.** Tighter recipe collapsed less aggressively but in the same way.
 
-If R1' also collapses, the v2 recipe itself is broken on this stack (transformers 5.5.0 / unsloth 2026.4.8) and we stop, dump diagnostic predictions, and consult before retraining further.
+## Two root causes identified
+
+### Bug 1: target_modules + LR mismatch with Unsloth official recipe
+
+The official Unsloth Gemma4 E4B audio notebook (`Gemma4_(E4B)-Audio.ipynb`) uses materially different settings than our v2 recipe:
+
+| Setting | Our v2 (R1') | Unsloth official |
+|---|---|---|
+| audio target_modules | `ffw_layer_1.linear`, `ffw_layer_2.linear`, `relative_k_proj`, `input_proj_linear`, `output_proj`, `embedding_projection` | `post`, `linear_start`, `linear_end`, `embedding_projection`, `ffw_layer_1`, `ffw_layer_2`, `output_proj` |
+| LR | 2e-4 (Unsloth generic-Gemma rec) | **5e-5** |
+| LoRA r / α | 32 / 64 | 8 / 16 |
+| `lora_dropout` | 0.1 | 0 |
+| `max_seq_length` | 4096 | 8192 |
+
+LR=2e-4 likely too aggressive on audio LoRA; high enough to push the language head into a strong unconditional prior fast. Our `.linear` suffix on audio modules also untested under unsloth 2026.4.8.
+
+### Bug 2: data noise from `[*s:]` semantic-error utterances
+
+Per Jiang et al. 2026 (arXiv:2603.15261, the paper STATUS.md cites for two-stage adaptation), AphasiaBank fine-tuning needs aggressive filtering: **keep only utterances tagged `[*p:]` (pronunciation paraphasia), exclude `[*s:]` (semantic paraphasia)**.
+
+Semantic paraphasias have noisy audio↔text alignment by design (speaker says "doggie" intending "cat"), and including them teaches the model that the audio→text mapping is unreliable, encouraging it to fall back on the language prior. This is exactly what we observed.
+
+The paper's filter dropped them to **456 speakers / 7.67 h training data** and achieved **27.70 % WER** on Whisper-Large-v3 SI-FT.
+
+## Dataset rebuild — paper recipe applied
+
+Reran the manifest pipeline with paper Section 2.2 filtering (`scripts/build_paper_dataset.py`):
+
+| | Paper | Ours |
+|---|---|---|
+| Filter | `[*p:] AND NOT [*s:]`, Protocol-only, PAR-only, ≥20 s/speaker | same |
+| SI speakers | 456 | **474** |
+| SI-FT hours | 7.67 | **7.40** |
+| SS speakers (top-10 % by duration) | 46 | **53** |
+| Speaker overlap (SI ∩ SS) | 0 | **0** ✓ |
+
+New manifests:
+- `aphasiabank_si_train.jsonl` — 3,956 clips / 7.40 h — for the next training run
+- `aphasiabank_si_val.jsonl` — 208 clips / 0.39 h — early-stop val
+- `aphasiabank_ss_test.jsonl` — 220 clips / 0.56 h — **speaker-disjoint eval set, replaces aphasiabank_val_v2_500.jsonl**
+- `aphasiabank_ss_train.jsonl`, `aphasiabank_ss_val.jsonl` — saved for future B3 personalization
+
+## R1'' — Unsloth official recipe + paper data (next)
+
+Apply both fixes simultaneously and target paper's B2 number (27.70 %).
+
+```python
+target_modules = [   # Unsloth official
+    "q_proj", "k_proj", "v_proj", "o_proj",
+    "gate_proj", "up_proj", "down_proj",
+    "post", "linear_start", "linear_end",
+    "embedding_projection", "ffw_layer_1", "ffw_layer_2", "output_proj",
+]
+r = 16; lora_alpha = 32; lora_dropout = 0
+lr = 5e-5
+max_seq_length = 8192
+batch_size = 4; grad_accum = 2  # eff batch 8, ~50 min/3000 steps
+manifest = aphasiabank_si_train.jsonl       # 7.40 h
+holdout  = aphasiabank_ss_test.jsonl        # 220 clips speaker-disjoint
+```

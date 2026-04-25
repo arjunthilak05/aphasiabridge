@@ -1,0 +1,43 @@
+{
+  "source": "Jiang et al. 2026 (arXiv:2603.15261) Section 2.2 recipe",
+  "filter": "[*p:] AND NOT [*s:], PAR-only, 0.5-30s clips, word_count >= 2",
+  "ss_fraction_top_speakers": 0.1,
+  "speakers": {
+    "ss_count": 53,
+    "si_count": 474,
+    "ss_total_hours": 4.38,
+    "si_total_hours": 7.79
+  },
+  "splits": {
+    "si_train": {
+      "clips": 3956,
+      "hours": 7.4
+    },
+    "si_val": {
+      "clips": 208,
+      "hours": 0.39
+    },
+    "ss_train": {
+      "clips": 1376
+    },
+    "ss_val": {
+      "clips": 152
+    },
+    "ss_test": {
+      "clips": 220,
+      "hours": 0.556
+    }
+  },
+  "paths": {
+    "si_train": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_si_train.jsonl",
+    "si_val": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_si_val.jsonl",
+    "ss_train": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_ss_train.jsonl",
+    "ss_val": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_ss_val.jsonl",
+    "ss_test": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_ss_test.jsonl"
+  },
+  "paper_reference": {
+    "speakers": 456,
+    "hours": 7.67
+  },
+  "seed": 42
+}
