@@ -1,24 +1,26 @@
-"""Gemma 4 / 3n audio LoRA fine-tune — Daniel Hanchen recipe (proven working).
+"""Gemma 4 E4B audio LoRA fine-tune — Daniel-recipe wins layered on Gemma 4 collator.
 
-Reference: Unsloth Kaggle notebook "Gemma 3N 4B Audio finetuning" (German ASR demo).
-That recipe achieved 24.32% -> 16.22% WER (33% relative reduction) on 3000 German
-clips in 47.82 min on a single T4. Our prior pipeline (UnslothVisionDataCollator +
-AssistantOnlyLossCollator + missing modules_to_save) plateaued at loss ~3.2 with
-no real WER win. This script mirrors Daniel's pattern verbatim.
+After R1-D attempt 1 (TypeError: AuxiliaryTrainingWrapper missing 'x' — Gemma 4
+calls embed_audio with kwarg, PEFT wrapper expects positional) and R1-D
+attempt 2 (ValueError: audio features 483840 vs tokens 190 — Daniel's custom
+processor() collator doesn't emit Gemma 4's required token_type_ids /
+mm_token_type_ids tensors), this version uses Unsloth's collator (correct for
+Gemma 4) but keeps Daniel's other proven wins:
 
-Key differences from train_gemma4_lora.py:
-  - target_modules audio list: ONLY post, linear_start, linear_end,
-    embedding_projection (drops ffw_layer_1, ffw_layer_2, output_proj — these
-    aren't in Daniel's recipe)
-  - modules_to_save = [lm_head, embed_tokens, embed_audio] — the audio embedding
-    is FULLY trained (not LoRA), which is what unblocks the audio path
-  - Custom collate_fn: processor.apply_chat_template(..., tokenize=False) then
-    processor(text=, audio=, return_tensors='pt', padding=True). Mask only
-    pad/audio/special tokens to -100, NOT the prompt — Daniel's recipe trains on
-    everything except padding and audio placeholder positions
-  - max_length 2048 (not 4096) — matches notebook exactly
-  - weight_decay 0.01 (not 0.001)
-  - warmup_ratio 0.1 (not 0.03)
+  - modules_to_save = [lm_head, embed_tokens]   (NOT embed_audio — Gemma 4
+    incompatible with PEFT's AuxiliaryTrainingWrapper for that module)
+  - Audio target_modules: 4 modules (post, linear_start, linear_end,
+    embedding_projection) instead of our prior 6
+  - weight_decay = 0.01, warmup_ratio = 0.1
+  - max_length = 2048
+  - r = 16, lora_alpha = 16, lora_dropout = 0
+  - lr default = 2e-4 (the user-suggested LR for this corrected setup —
+    higher than Daniel's 5e-5; the rationale is that fully-trained heads
+    via modules_to_save absorb noisy gradient that would otherwise destabilize
+    the LoRA at this LR)
+  - 3 epochs (vs Daniel's 1) since our dataset (3,956 clips) is small
+  - Loss flows on prompt+answer (UnslothVisionDataCollator default) —
+    NOT assistant-only like our prior train_gemma4_lora.py
 """
 from __future__ import annotations
 import os, sys, json, argparse, time
@@ -35,6 +37,7 @@ torch._dynamo.config.disable = True
 torch._dynamo.config.suppress_errors = True
 
 from unsloth import FastModel
+from unsloth.trainer import UnslothVisionDataCollator
 from trl import SFTTrainer, SFTConfig
 from datasets import Dataset
 import soundfile as sf
@@ -51,68 +54,22 @@ def load_manifest(path: str) -> list[dict]:
         return [json.loads(l) for l in f if l.strip()]
 
 
-def build_collate_fn(processor):
-    """Daniel Hanchen's collator: apply_chat_template(tokenize=False) then
-    processor(text=, audio=, padding=True). Mask pad / audio placeholder /
-    special boi/eoi tokens to -100; loss on everything else (prompt + answer).
-    """
-    tok = processor.tokenizer
-
-    def collate_fn(examples):
-        texts, audios = [], []
-        for ex in examples:
-            audio, sr = sf.read(ex["audio_path"])
-            assert sr == 16000, f"expected 16 kHz got {sr} at {ex['audio_path']}"
-            messages = [
-                {"role": "system",
-                 "content": [{"type": "text", "text": SYSTEM_PROMPT}]},
-                {"role": "user",
-                 "content": [
-                     {"type": "audio", "audio": audio},
-                     {"type": "text",  "text": USER_PROMPT},
-                 ]},
-                {"role": "assistant",
-                 "content": [{"type": "text", "text": ex["transcript"]}]},
-            ]
-            text = processor.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=False
-            ).strip()
-            texts.append(text)
-            audios.append(audio)
-        batch = processor(
-            text=texts, audio=audios, return_tensors="pt", padding=True,
-        )
-        labels = batch["input_ids"].clone()
-        labels[labels == tok.pad_token_id] = -100
-        for attr in ("audio_token_id", "image_token_id",
-                     "boi_token_id", "eoi_token_id",
-                     "boa_token_id", "eoa_token_id"):
-            if hasattr(tok, attr):
-                tid = getattr(tok, attr)
-                if tid is not None:
-                    labels[labels == tid] = -100
-        batch["labels"] = labels
-        return batch
-
-    return collate_fn
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--manifest", required=True)
     ap.add_argument("--holdout-manifest", default=None)
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--max-steps", type=int, default=-1,
-                    help="If -1, use --num-epochs instead. Daniel's notebook used 1 epoch.")
-    ap.add_argument("--num-epochs", type=int, default=1)
-    ap.add_argument("--batch-size", type=int, default=2)        # Daniel's value
-    ap.add_argument("--grad-accum", type=int, default=1)        # Daniel's value
-    ap.add_argument("--lora-r", type=int, default=8)            # Daniel's value
-    ap.add_argument("--lora-alpha", type=int, default=16)       # Daniel's value
-    ap.add_argument("--lr", type=float, default=5e-5)           # Daniel's value
-    ap.add_argument("--warmup-ratio", type=float, default=0.1)  # Daniel's value
-    ap.add_argument("--weight-decay", type=float, default=0.01) # Daniel's value
-    ap.add_argument("--max-length", type=int, default=2048)     # Daniel's value
+                    help="If -1, use --num-epochs instead.")
+    ap.add_argument("--num-epochs", type=int, default=3)
+    ap.add_argument("--batch-size", type=int, default=2)
+    ap.add_argument("--grad-accum", type=int, default=4)         # eff batch 8
+    ap.add_argument("--lora-r", type=int, default=16)
+    ap.add_argument("--lora-alpha", type=int, default=16)
+    ap.add_argument("--lr", type=float, default=2e-4)
+    ap.add_argument("--warmup-ratio", type=float, default=0.1)
+    ap.add_argument("--weight-decay", type=float, default=0.01)
+    ap.add_argument("--max-length", type=int, default=2048)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--seed", type=int, default=3407)
     args = ap.parse_args()
@@ -127,9 +84,10 @@ def main():
         load_in_4bit=True,
         full_finetuning=False,
     )
-    print(f"  loaded in cuda; VRAM={torch.cuda.memory_allocated()/1e9:.2f} GB")
+    print(f"  loaded; VRAM={torch.cuda.memory_allocated()/1e9:.2f} GB")
 
-    print(f"[{time.strftime('%H:%M:%S')}] applying LoRA r={args.lora_r} alpha={args.lora_alpha} (Daniel recipe) ...", flush=True)
+    print(f"[{time.strftime('%H:%M:%S')}] applying LoRA r={args.lora_r} alpha={args.lora_alpha} "
+          f"+ modules_to_save=[lm_head, embed_tokens] ...", flush=True)
     model = FastModel.get_peft_model(
         model,
         finetune_vision_layers=False,
@@ -144,25 +102,22 @@ def main():
         use_rslora=False,
         loftq_config=None,
         target_modules=[
-            # Verbatim from Daniel Hanchen's Gemma 3N 4B audio notebook (proven working)
+            # Daniel Hanchen Gemma 3n notebook target_modules (4 audio modules only)
             "q_proj", "k_proj", "v_proj", "o_proj",
             "gate_proj", "up_proj", "down_proj",
-            # Audio layers (only the 4 from Daniel's recipe)
             "post", "linear_start", "linear_end",
             "embedding_projection",
         ],
-        # Daniel's recipe targets Gemma 3n where embed_audio takes positional args.
-        # In Gemma 4, embed_audio is called as `self.embed_audio(inputs_embeds=...)` and
-        # PEFT's AuxiliaryTrainingWrapper barfs (TypeError: missing 1 required positional
-        # argument: 'x'). Drop it from modules_to_save; lm_head + embed_tokens still
-        # captures most of Daniel's "fully train the heads" win.
+        # Critical: lm_head + embed_tokens fully trained. embed_audio NOT included
+        # because Gemma 4's modeling_gemma4.py:2329 calls it with kwarg
+        # `inputs_embeds=` and PEFT's AuxiliaryTrainingWrapper requires positional.
         modules_to_save=[
             "lm_head",
             "embed_tokens",
         ],
     )
 
-    # Build dataset (lazy audio loading via collator)
+    # Lazy-loaded dataset
     records = load_manifest(args.manifest)
     if args.limit:
         records = records[:args.limit]
@@ -172,7 +127,31 @@ def main():
     light = [{"audio_path": r["audio_path"], "transcript": r["transcript"]} for r in records]
     train_ds = Dataset.from_list(light)
 
-    collate_fn = build_collate_fn(processor)
+    def _lazy_messages(batch):
+        msgs = []
+        for p, t in zip(batch["audio_path"], batch["transcript"]):
+            audio, sr = sf.read(p)
+            assert sr == 16000, f"expected 16 kHz got {sr} at {p}"
+            msgs.append([
+                {"role": "system",
+                 "content": [{"type": "text", "text": SYSTEM_PROMPT}]},
+                {"role": "user",
+                 "content": [
+                     {"type": "audio", "audio": audio},
+                     {"type": "text",  "text": USER_PROMPT},
+                 ]},
+                {"role": "assistant",
+                 "content": [{"type": "text", "text": t}]},
+            ])
+        return {"messages": msgs}
+
+    train_ds.set_transform(_lazy_messages)
+    print(f"  dataset (lazy): {len(train_ds)} records, audio loaded on access")
+
+    # CRITICAL: UnslothVisionDataCollator handles Gemma 4's audio token expansion
+    # math correctly (emits token_type_ids + mm_token_type_ids). Don't wrap it
+    # in AssistantOnlyLossCollator — Daniel's recipe trains on prompt+answer.
+    data_collator = UnslothVisionDataCollator(model, processor)
 
     sft_args = dict(
         per_device_train_batch_size=args.batch_size,
@@ -188,10 +167,10 @@ def main():
         seed=args.seed,
         output_dir=args.output_dir,
         report_to="none",
+        # Required for multimodal — keep mm_token_type_ids etc.
         remove_unused_columns=False,
         dataset_text_field="",
         dataset_kwargs={"skip_prepare_dataset": True},
-        dataset_num_proc=2,
         max_length=args.max_length,
         bf16=True,
         fp16=False,
@@ -205,7 +184,7 @@ def main():
         model=model,
         train_dataset=train_ds,
         processing_class=processor.tokenizer,
-        data_collator=collate_fn,
+        data_collator=data_collator,
         args=SFTConfig(**sft_args),
     )
 
