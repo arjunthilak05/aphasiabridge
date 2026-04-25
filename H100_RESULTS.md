@@ -502,3 +502,53 @@ collapse).
    to learn meaningfully. Pivot to: APROCSA + synthetic data scale-up (~30 h
    target), or fall back to CONTINGENCY.md Strategy A (Whisper front-end +
    Gemma text intent).
+
+## Q. Phase 1 — generation-time fix re-eval (no retraining)
+
+Hypothesis tested: the repeat-loop attractor is a *decoding* failure as much as a
+training failure (same as Whisper's classic problem). Standard fix:
+`repetition_penalty=1.3 + no_repeat_ngram_size=4 + max_new_tokens=200 + beam=1`.
+Re-evaluated all 4 saved LoRAs with the new generate kwargs — no retraining.
+
+### Re-eval scoreboard (all on the same 220-clip speaker-disjoint ss_test)
+
+| Run | OLD WER | **NEW WER** | OLD repeat-loops | **NEW repeat-loops** | OLD hallucinations | **NEW hallucinations** |
+|---|---|---|---|---|---|---|
+| R1-D3 | 2.093 | **0.5798** | 15 | **0** | 9 | **10** |
+| R1-D4a | 0.802 | **0.5254** | ? | **0** | ? | **2** |
+| R1-D4b | 0.723 | **0.5415** | ? | **0** | ? | **2** |
+| R1-D4c | 0.734 | **0.5318** | 3 | **0** | 2 | **2** |
+
+**BASE Gemma 4 E4B with new gen kwargs:** 0.6138 WER (vs 0.556 with old gen kwargs).
+
+### Per-severity AFTER (new gen kwargs)
+
+| Severity | BASE | R1-D3 | R1-D4a | R1-D4b | R1-D4c |
+|---|---|---|---|---|---|
+| mild | 0.6142 | 0.555 | 0.5258 | 0.52 | 0.5167 |
+| moderate | 0.6834 | 0.723 | 0.5884 | 0.6887 | 0.6491 |
+| unknown | 0.5164 | 0.4909 | 0.4364 | 0.4327 | 0.4364 |
+
+### Winner with gen-time fix: **R1-D4a** at WER **0.5254**
+
+## R. Whisper-Large-v3 zero-shot baseline (architecture decision input)
+
+Run on the same 220-clip ss_test, beam=5 language=en, no preprocessing.
+
+| Metric | Whisper-Large-v3 (zero-shot) | BASE Gemma 4 E4B (zero-shot, lowercase) |
+|---|---|---|
+| Overall WER (lowercase) | **0.7927** | **0.6138** |
+| Overall CER (lowercase) | 0.7854 | – |
+| Overall WER (Whisper EnglishNormalizer) | **0.7581** | – |
+| Errors | 0/220 | – |
+
+Per-severity WER (Whisper, normalized):
+- moderate: 2.0293
+- mild: 0.5015
+- unknown: 0.2779
+
+Paper reference (Jiang et al. 2026, B1 column): Whisper-Large-v3 = 39.97 % WER on their AphasiaBank test split. Our 220-clip ss_test is harder (different speakers, all `[*p:]` filtered).
+
+### Architecture decision
+
+**Whisper-Large-v3 zero-shot (0.7927) is WORSE than BASE Gemma 4 E4B (0.6138) on this test set.** CONTINGENCY.md Strategy A (Whisper-front-end + Gemma-intent) is OFF the table — using Whisper as the ASR layer would strictly degrade quality. **Ship path: continue with Gemma 4 audio LoRA refinements; BASE Gemma is genuinely strong on aphasic English.**
