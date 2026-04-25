@@ -29,7 +29,6 @@ from unsloth import FastModel
 import soundfile as sf
 import jiwer
 from transformers.models.whisper.english_normalizer import EnglishTextNormalizer
-from peft import PeftModel
 
 MODEL_ID = "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit"
 SYSTEM_PROMPT = "You are an assistant that transcribes speech accurately."
@@ -116,14 +115,13 @@ def main():
         length_penalty=args.length_penalty,
     )
 
-    # Load BASE model + D4b LoRA once for baseline pass
-    print(f"[{time.strftime('%H:%M:%S')}] loading BASE + R1-D4b for baseline pass ...", flush=True)
-    base_model, processor = FastModel.from_pretrained(
-        model_name=MODEL_ID, dtype=None,
+    # Load D4b via FastModel directly (Unsloth handles Gemma4ClippableLinear; stock PEFT doesn't)
+    print(f"[{time.strftime('%H:%M:%S')}] loading R1-D4b (via FastModel.from_pretrained on lora_dir) ...", flush=True)
+    d4b_model, processor = FastModel.from_pretrained(
+        model_name=args.si_lora_dir, dtype=None,
         max_seq_length=args.max_new_tokens + 1024, load_in_4bit=True,
         full_finetuning=False,
     )
-    d4b_model = PeftModel.from_pretrained(base_model, args.si_lora_dir, is_trainable=False)
     d4b_model.eval()
     print(f"  baseline model loaded; VRAM={torch.cuda.memory_allocated()/1e9:.2f} GB")
 
@@ -138,7 +136,7 @@ def main():
         print(f"  {spk}: D4b baseline {len(clips)} clips done", flush=True)
 
     # Free model so SS-FT models can load
-    del d4b_model, base_model
+    del d4b_model
     torch.cuda.empty_cache()
 
     # Now load each SS-FT adapter and eval that speaker's clips
@@ -152,17 +150,16 @@ def main():
         clips = by_speaker.get(spk, [])
         if not clips:
             continue
-        # Reload model fresh each speaker (otherwise PEFT adapter swapping is messy)
-        base_model, processor = FastModel.from_pretrained(
-            model_name=MODEL_ID, dtype=None,
+        # Load BASE+SS-FT directly via FastModel (Gemma4ClippableLinear workaround)
+        ss_model, processor = FastModel.from_pretrained(
+            model_name=ss_dir, dtype=None,
             max_seq_length=args.max_new_tokens + 1024, load_in_4bit=True,
             full_finetuning=False,
         )
-        ss_model = PeftModel.from_pretrained(base_model, ss_dir, is_trainable=False)
         ss_model.eval()
         all_ss_preds[spk] = run_inference(ss_model, processor, clips, gen_kwargs)
         print(f"  {spk}: SS-FT {len(clips)} clips done", flush=True)
-        del ss_model, base_model
+        del ss_model
         torch.cuda.empty_cache()
 
     # Aggregate
