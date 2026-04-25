@@ -151,10 +151,14 @@ def main():
             "post", "linear_start", "linear_end",
             "embedding_projection",
         ],
+        # Daniel's recipe targets Gemma 3n where embed_audio takes positional args.
+        # In Gemma 4, embed_audio is called as `self.embed_audio(inputs_embeds=...)` and
+        # PEFT's AuxiliaryTrainingWrapper barfs (TypeError: missing 1 required positional
+        # argument: 'x'). Drop it from modules_to_save; lm_head + embed_tokens still
+        # captures most of Daniel's "fully train the heads" win.
         modules_to_save=[
             "lm_head",
             "embed_tokens",
-            "embed_audio",   # CRITICAL — fully train the audio embedding
         ],
     )
 
