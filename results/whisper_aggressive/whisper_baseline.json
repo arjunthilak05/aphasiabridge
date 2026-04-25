@@ -1,0 +1,1348 @@
+{
+  "model": "openai/whisper-large-v3",
+  "holdout": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_ss_test.jsonl",
+  "n_clips": 220,
+  "n_errors": 0,
+  "wer_lowercase": {
+    "wer": 0.466,
+    "cer": 0.3034,
+    "n": 220,
+    "per_severity_wer": {
+      "moderate": 0.6074,
+      "mild": 0.4485,
+      "unknown": 0.3676
+    }
+  },
+  "wer_normalized": {
+    "wer": 0.3472,
+    "cer": 0.2671,
+    "n": 220,
+    "per_severity_wer": {
+      "moderate": 0.4756,
+      "mild": 0.3251,
+      "unknown": 0.2837
+    }
+  },
+  "predictions": [
+    {
+      "ref": "all the this lad or son football broke windows windows",
+      "hyp": "La, la, la, or sun. I don't know. Football. Windowose. Winderose.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-4"
+    },
+    {
+      "ref": "it's the this aunt aunt sister sister",
+      "hyp": "Aunt. Sister. Son.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-4"
+    },
+    {
+      "ref": "a a a knife knife knife",
+      "hyp": "I like life. No, no, no. Shammy.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-4"
+    },
+    {
+      "ref": "oh what or i know what transportation you can get there",
+      "hyp": "oh, I know what transportation you can get there.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-2"
+    },
+    {
+      "ref": "and it's come waste your time with me",
+      "hyp": "is like, Kim, waste your time with me.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-2"
+    },
+    {
+      "ref": "but i or the he heard gobbledygook",
+      "hyp": "but he heard Gav a little bit.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-2"
+    },
+    {
+      "ref": "and the stepmom was like",
+      "hyp": "And the stepmom was like,",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-2"
+    },
+    {
+      "ref": "my dad my dad bought bird feeder bird feeder",
+      "hyp": "My dad bought a bar feeder.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_90-1"
+    },
+    {
+      "ref": "hm recently my family flew flew europe europe trip last last spring",
+      "hyp": "Recently, my family flew Europe trip last spring.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_90-1"
+    },
+    {
+      "ref": "and house house of the the house house the the the the aunt aunt house house",
+      "hyp": "House, house, house.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-6"
+    },
+    {
+      "ref": "ah is is the the slippers we you you you you",
+      "hyp": "It's the cypress. It's green. You, you, you, human.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-6"
+    },
+    {
+      "ref": "now the the the mice the mice they take the cinderella cinderella",
+      "hyp": "uh the uh the mace the main mace um you take the uh",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-6"
+    },
+    {
+      "ref": "so she was going on the stairs like this",
+      "hyp": "So she was going on the chairs like this.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_133-2"
+    },
+    {
+      "ref": "then all of a sudden the the lady the fairy she saw cinderella because she was sitting looking kind of sad",
+      "hyp": "Then all of a sudden, the lady, the fairy, she saw Cinderella because she was sitting looking kind of sad.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_133-2"
+    },
+    {
+      "ref": "and it was right in their foyer foyer foyer right when they'd come over here because my mom and dad had a very nice home",
+      "hyp": "And it was right in their guard, right when they come over here, because my mom had a very nice home.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_133-2"
+    },
+    {
+      "ref": "but it chimed every fifteen minutes",
+      "hyp": "But it climbed every 15 minutes.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_133-2"
+    },
+    {
+      "ref": "but then after he did it for a little bit i think got a little tired of seeing his head getting wet like that",
+      "hyp": "But then after he did it for a little bit, I think I'll tire of seeing his head getting white like that.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_133-2"
+    },
+    {
+      "ref": "and and i tie them",
+      "hyp": "And a ton of them.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_249-1"
+    },
+    {
+      "ref": "and i i had got to the marriott club",
+      "hyp": "And I had got to the Marriott Club.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_249-1"
+    },
+    {
+      "ref": "i i've gotta tell you that normally i wouldn't do i work work out five times a week a week",
+      "hyp": "I've got to tell you that normally I wouldn't do my work out five times a week.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_249-1"
+    },
+    {
+      "ref": "i would get two slices of bread",
+      "hyp": "I would. It. Who slots as a brand?",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-2"
+    },
+    {
+      "ref": "so i mean one is was always special when i was a kid",
+      "hyp": "I mean, one was always special when I was a kid.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-2"
+    },
+    {
+      "ref": "and one time we were in anguilla in the caribbean",
+      "hyp": "And one time we were held anguilla in the cattle",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-2"
+    },
+    {
+      "ref": "there's a lot activity here",
+      "hyp": "There's a lock activity here.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-2"
+    },
+    {
+      "ref": "one of when i was in sales for my company it sold designated processing software to banks",
+      "hyp": "One of, when I was in sales for my company, sold designated processing software to banks.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-2"
+    },
+    {
+      "ref": "and he wanted him to get married",
+      "hyp": "And he wanted him to get married.",
+      "severity": null,
+      "speaker": "NEURAL_59-2"
+    },
+    {
+      "ref": "and while they were trying that on with the the duke the mice were able to get in the stepmother's pocket and get the key and got or got it to cinderella so she can open the door",
+      "hyp": "And while they were trying that on with the Duke, the mice were able to get in the stick mother's pocket.",
+      "severity": null,
+      "speaker": "NEURAL_59-2"
+    },
+    {
+      "ref": "so so a lot of stuff i do",
+      "hyp": "So lots of stuff I do.",
+      "severity": null,
+      "speaker": "NEURAL_59-2"
+    },
+    {
+      "ref": "so they snuck downstairs and looked at stuff that the stepsisters that were throwing away",
+      "hyp": "So they snuck downstairs and looked at stuff that the stepsisters that were throwing away.",
+      "severity": null,
+      "speaker": "NEURAL_59-2"
+    },
+    {
+      "ref": "and i i wanted to change my pjs because i didn't want to go to the hospital in my pjs",
+      "hyp": "And I wanted to change my pee days because I didn't want to go to the hospital in my",
+      "severity": null,
+      "speaker": "NEURAL_59-2"
+    },
+    {
+      "ref": "cinderella and her dad were looking for or her dad was looking for a wife",
+      "hyp": "Cinderella and her dad were looking for, or her dad was looking for a wife.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-2"
+    },
+    {
+      "ref": "and they they heard noises coming from inside the mattress",
+      "hyp": "And they heard noises coming from inside the metric.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-2"
+    },
+    {
+      "ref": "and the animals made her a dress",
+      "hyp": "And the animals made her a tree.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-2"
+    },
+    {
+      "ref": "i i thought they let me go",
+      "hyp": "I thought they led me code.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-2"
+    },
+    {
+      "ref": "it it from my perspective it did it didn't take long for the ambulance to get there",
+      "hyp": "From my perspective, it didn't take long for the ambulance to get there.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-2"
+    },
+    {
+      "ref": "and cinderella had to do all the chores",
+      "hyp": "Cinderella had to do all the chores.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-2"
+    },
+    {
+      "ref": "i notice i after i had my stroke i was a lot more emotional than before",
+      "hyp": "After I had my stroke, I was a lot more emotional than before.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-2"
+    },
+    {
+      "ref": "so the child",
+      "hyp": "So the style.",
+      "severity": null,
+      "speaker": "NEURAL_48-1"
+    },
+    {
+      "ref": "lauren bislick wilson in top notch yeah",
+      "hyp": "um learning big like wilson and pop not yeah",
+      "severity": null,
+      "speaker": "NEURAL_48-1"
+    },
+    {
+      "ref": "oh want to man on the ball crack window",
+      "hyp": "Oh.",
+      "severity": null,
+      "speaker": "NEURAL_48-1"
+    },
+    {
+      "ref": "rain in this house",
+      "hyp": "vein in itself.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-2"
+    },
+    {
+      "ref": "a clock was bought at a grocery store",
+      "hyp": "A crosswise spot as a grocery store.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-2"
+    },
+    {
+      "ref": "laundry soap laundry soap",
+      "hyp": "Well, hungry soap, hungry soap.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-2"
+    },
+    {
+      "ref": "cinderella was summoned summoned summoned summoned",
+      "hyp": "Cinderella with salmon, salmon, salmon. Salmon.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-2"
+    },
+    {
+      "ref": "yeah vegetables",
+      "hyp": "Yeah, they're both.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-2"
+    },
+    {
+      "ref": "so a a got out",
+      "hyp": "So, A-A-O-T out.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-2"
+    },
+    {
+      "ref": "or the ambulance wasn't or could take us to the city limits",
+      "hyp": "the ambulance wasn't or could take us to the to the",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-1"
+    },
+    {
+      "ref": "show and tell",
+      "hyp": "Go on, Chell.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-1"
+    },
+    {
+      "ref": "but we could or we were lucky enough to go see them outside",
+      "hyp": "but we were lucky enough to go see him",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-1"
+    },
+    {
+      "ref": "and her stepsisters tried on the shoes or shoe shoe and couldn't fit",
+      "hyp": "And her stepsisters tried on the shoes or shoe and couldn't fit.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-1"
+    },
+    {
+      "ref": "and i would start them up for damp dry",
+      "hyp": "And I would start them up for jam chai.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_86-1"
+    },
+    {
+      "ref": "i don't know how to say",
+      "hyp": "I don't know how to say.",
+      "severity": null,
+      "speaker": "NEURAL_59-1"
+    },
+    {
+      "ref": "then all of a sudden her fairy godmother came and told her what or asked her why she was crying",
+      "hyp": "Then all of a sudden, her fairy godmother came and asked her why she was crying.",
+      "severity": null,
+      "speaker": "NEURAL_59-1"
+    },
+    {
+      "ref": "a person to open the doors for the coach",
+      "hyp": "like a person to open the doors for the coach",
+      "severity": null,
+      "speaker": "NEURAL_59-1"
+    },
+    {
+      "ref": "and she she was trying to get it out",
+      "hyp": "and she was trying to get it out",
+      "severity": null,
+      "speaker": "NEURAL_59-1"
+    },
+    {
+      "ref": "and then probably around i think it was eight in the evening i came out",
+      "hyp": "and then probably around like I think was eight in the evening I came out and I",
+      "severity": null,
+      "speaker": "NEURAL_59-1"
+    },
+    {
+      "ref": "and she went to the garden",
+      "hyp": "and she went to the garage",
+      "severity": null,
+      "speaker": "NEURAL_59-1"
+    },
+    {
+      "ref": "and that's the end",
+      "hyp": "that in",
+      "severity": "mild",
+      "speaker": "Williamson_williamson15a"
+    },
+    {
+      "ref": "i i was evacuated to the hospital in x x",
+      "hyp": "I was evacuated to the hospital in Egypt.",
+      "severity": "mild",
+      "speaker": "Williamson_williamson15a"
+    },
+    {
+      "ref": "the child goes outside and it was raining",
+      "hyp": "The cell goes outside in Edward's swinging.",
+      "severity": "mild",
+      "speaker": "Williamson_williamson15a"
+    },
+    {
+      "ref": "but man climbs the tree with a ladder",
+      "hyp": "that man climbs the tree, went out of that",
+      "severity": "mild",
+      "speaker": "Williamson_williamson15a"
+    },
+    {
+      "ref": "but she was surprised when the prince announced the dance",
+      "hyp": "She was. The prince announced the.",
+      "severity": "mild",
+      "speaker": "Williamson_williamson15a"
+    },
+    {
+      "ref": "i would like to go to the lowe's to get some flowers",
+      "hyp": "I would like to go to the loaves to get some flowers.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_90-2"
+    },
+    {
+      "ref": "she ran she ran down the stairs",
+      "hyp": "She ran, she ran downstairs.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_90-2"
+    },
+    {
+      "ref": "i know that in fact i had a stroke and now aphasia",
+      "hyp": "I know that in fact, I had a stroke and now a facial.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_90-2"
+    },
+    {
+      "ref": "and my father offered to pay for me to go to the university of chicago",
+      "hyp": "And my father offered to pay for me to go to the University of Chicago.",
+      "severity": null,
+      "speaker": "NEURAL_58-1"
+    },
+    {
+      "ref": "i think that the child refuses the to to get bring the umbrella",
+      "hyp": "I think that the charity refuses to bring the umbrella",
+      "severity": null,
+      "speaker": "NEURAL_58-1"
+    },
+    {
+      "ref": "and the university of chicago no tuition",
+      "hyp": "And the University of Chicago, no tuition.",
+      "severity": null,
+      "speaker": "NEURAL_58-1"
+    },
+    {
+      "ref": "the mother in law works and works cinderella to the bone",
+      "hyp": "The mother antler works and works Cinderella to the bone.",
+      "severity": null,
+      "speaker": "NEURAL_58-1"
+    },
+    {
+      "ref": "all all the all the all all all the round the the hourse the all the house the the the the the house",
+      "hyp": "over and at the host no honey hosting neither me has named them",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-3"
+    },
+    {
+      "ref": "football and the the football the boy the football and the the windows windows",
+      "hyp": "football and the the football or the boy the football I needed windows with those",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-3"
+    },
+    {
+      "ref": "the the the boy",
+      "hyp": "the book board.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-3"
+    },
+    {
+      "ref": "i decided to walk to the lake",
+      "hyp": "I decided to work to the light.",
+      "severity": null,
+      "speaker": "NEURAL_58-2"
+    },
+    {
+      "ref": "incidentally incidentally i spoke turkish fluently",
+      "hyp": "Incidentally, I spoke Turkish fluently.",
+      "severity": null,
+      "speaker": "NEURAL_58-2"
+    },
+    {
+      "ref": "i i think i i determined to walk three miles",
+      "hyp": "think I determined to walk three miles",
+      "severity": null,
+      "speaker": "NEURAL_58-2"
+    },
+    {
+      "ref": "and she runs down the stairs and trips on trips on the glass slipper and went home",
+      "hyp": "and she runs down the stairs and trips on the glass slugger and went home.",
+      "severity": null,
+      "speaker": "NEURAL_58-2"
+    },
+    {
+      "ref": "and i applied to purdue iu wisconsin and the university of chicago",
+      "hyp": "And I applied to Purdue, IU, Wisconsin, and the University of Chicago.",
+      "severity": null,
+      "speaker": "NEURAL_58-2"
+    },
+    {
+      "ref": "the daughter is crying because her cat is up a tree",
+      "hyp": "The daughter is crying because her cot is up.",
+      "severity": null,
+      "speaker": "NEURAL_58-2"
+    },
+    {
+      "ref": "and i the the left hand was paralyzed",
+      "hyp": "The lap hand was parallel.",
+      "severity": null,
+      "speaker": "NEURAL_58-2"
+    },
+    {
+      "ref": "find the lady who stepped glass slipper",
+      "hyp": "find the lady who stuck",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_307-2"
+    },
+    {
+      "ref": "later the cinderella and prince is dancing",
+      "hyp": "Later, the Cinderella's and Prince is dancing.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_307-2"
+    },
+    {
+      "ref": "the mouse and the cinderella",
+      "hyp": "the",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_307-2"
+    },
+    {
+      "ref": "i one two three three hours computer every day",
+      "hyp": "One, two, three. Three hours of converter every day.",
+      "severity": "mild",
+      "speaker": "Adler_adler25a"
+    },
+    {
+      "ref": "every everybody and try on try on try on s l ipper",
+      "hyp": "a dry and",
+      "severity": "mild",
+      "speaker": "Adler_adler25a"
+    },
+    {
+      "ref": "the mom is the mom is i",
+      "hyp": "The bomb is ready.",
+      "severity": "mild",
+      "speaker": "Adler_adler25a"
+    },
+    {
+      "ref": "i two two bread two pieces two two pieces",
+      "hyp": "And I am too, too friend, too curious.",
+      "severity": "mild",
+      "speaker": "Adler_adler25a"
+    },
+    {
+      "ref": "and dancing person",
+      "hyp": "and sensing",
+      "severity": "mild",
+      "speaker": "Adler_adler25a"
+    },
+    {
+      "ref": "and and and this the ball is and x cinderella",
+      "hyp": "And this",
+      "severity": "mild",
+      "speaker": "Adler_adler25a"
+    },
+    {
+      "ref": "and and the the the the the mice mice the the the the driver driver",
+      "hyp": "and then on the uh to the uh the other me me but uh the uh this for the uh the drug driver driver",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-2"
+    },
+    {
+      "ref": "dad dad dad dad",
+      "hyp": "Dad, dad, dad.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-2"
+    },
+    {
+      "ref": "the the pumpkin pumpkin",
+      "hyp": "the bup-pup-pushin', bup-bupkin', bow.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-2"
+    },
+    {
+      "ref": "the the sisters sisters sisters sisters sisters",
+      "hyp": "That's the other... Sisters, sisters, sisters. Sisters.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1015-2"
+    },
+    {
+      "ref": "cinderella yes but cinderella cleaned and yes",
+      "hyp": "Swinella, yes. But Swinella trained, yes.",
+      "severity": "moderate",
+      "speaker": "TAP_tap11a"
+    },
+    {
+      "ref": "not good",
+      "hyp": "not good.",
+      "severity": "moderate",
+      "speaker": "TAP_tap11a"
+    },
+    {
+      "ref": "but x she's sweet",
+      "hyp": "But, you know, it's just sweet.",
+      "severity": "moderate",
+      "speaker": "TAP_tap11a"
+    },
+    {
+      "ref": "and cinderella happy",
+      "hyp": "and Swindabwella, uh, Pabbie,",
+      "severity": "moderate",
+      "speaker": "TAP_tap11a"
+    },
+    {
+      "ref": "and after i had my stroke i got a i had a strange obsession with time",
+      "hyp": "And after I had my stroke, I got a strange obsession with time.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-1"
+    },
+    {
+      "ref": "what's the word i am looking for",
+      "hyp": "What's the word I am looking for?",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-1"
+    },
+    {
+      "ref": "i haven't been without a watch for five days",
+      "hyp": "I have been pinned without a watch for five days.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-1"
+    },
+    {
+      "ref": "and the and the managers got to have a room by by themself",
+      "hyp": "And the ministers got to have a room by themselves.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-1"
+    },
+    {
+      "ref": "and i but with we were just about to go to sleep",
+      "hyp": "But we were just about to go to sleep.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-1"
+    },
+    {
+      "ref": "it's just just like being in england",
+      "hyp": "It is just like being in...",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-1"
+    },
+    {
+      "ref": "i i that is the first times since my my my childhood that i have heard an owl",
+      "hyp": "That is the first time since my childhood that I have heard and",
+      "severity": "mild",
+      "speaker": "NEURAL-2_243-1"
+    },
+    {
+      "ref": "and close it up",
+      "hyp": "and close it up.",
+      "severity": "moderate",
+      "speaker": "ACWT_ACWT02a"
+    },
+    {
+      "ref": "and she left her glass shoes behind",
+      "hyp": "And she left her last shoes behind.",
+      "severity": "moderate",
+      "speaker": "ACWT_ACWT02a"
+    },
+    {
+      "ref": "and so she locks herself in the basement",
+      "hyp": "And so she locks herself in the basement.",
+      "severity": "moderate",
+      "speaker": "ACWT_ACWT02a"
+    },
+    {
+      "ref": "and i eat it",
+      "hyp": "and I hit it.",
+      "severity": "moderate",
+      "speaker": "ACWT_ACWT02a"
+    },
+    {
+      "ref": "cinderella was pretty girl",
+      "hyp": "Cinderella pose. Pretty curl.",
+      "severity": "moderate",
+      "speaker": "ACWT_ACWT02a"
+    },
+    {
+      "ref": "the man is the man is stuck",
+      "hyp": "The man is",
+      "severity": "mild",
+      "speaker": "NEURAL-2_104-1"
+    },
+    {
+      "ref": "the raining",
+      "hyp": "Yeah.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_104-1"
+    },
+    {
+      "ref": "i love to restaurant in this san francisco",
+      "hyp": "I love to restaurant and",
+      "severity": "mild",
+      "speaker": "NEURAL-2_104-1"
+    },
+    {
+      "ref": "strawberry jam and peanut butter",
+      "hyp": "Um, strawberry jam and peanut butter. Okay.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1062-4"
+    },
+    {
+      "ref": "that's daddy or some daddy and cat",
+      "hyp": "And daddy, our son. Daddy and daddy.",
+      "severity": "moderate",
+      "speaker": "Kurland_kurland29b"
+    },
+    {
+      "ref": "and were cinderella to take care of you but no no no",
+      "hyp": "and Zendala Wella to take care of you, but no.",
+      "severity": "moderate",
+      "speaker": "Kurland_kurland29b"
+    },
+    {
+      "ref": "home you go home",
+      "hyp": "You don't.",
+      "severity": "moderate",
+      "speaker": "Kurland_kurland29b"
+    },
+    {
+      "ref": "and here i am now with this stroke has not been turn a great well to it even though i'm struggling with it",
+      "hyp": "And here I am now with this stroke has not been turned a great well to it. I'm struggling with it.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_234-2"
+    },
+    {
+      "ref": "and you had perfect fourteens nineteen forty probably or some you good music playing all the time on this thing",
+      "hyp": "And you had perfect 14s, 1940 probably, or some, you know, good music paying all the time on this thing.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_234-2"
+    },
+    {
+      "ref": "she goes to the castle castle to the evening",
+      "hyp": "She goes to the castle to the evening.",
+      "severity": "moderate",
+      "speaker": "NEURAL-2_234-2"
+    },
+    {
+      "ref": "the fairy godmother miraculously made a dress for cinderella made a made a cart for cinderella",
+      "hyp": "um um the fair gov mother",
+      "severity": "mild",
+      "speaker": "Thompson_thompson06a"
+    },
+    {
+      "ref": "i walked into the the dining room and the jelly strawberry jelly and my legs screw it up",
+      "hyp": "I walked into the dining room and my legs screwed it up.",
+      "severity": "mild",
+      "speaker": "Thompson_thompson06a"
+    },
+    {
+      "ref": "cinderella was born of the merchant and the wife",
+      "hyp": "was born of the merchant and the wife.",
+      "severity": "mild",
+      "speaker": "Thompson_thompson06a"
+    },
+    {
+      "ref": "they have the ball ball",
+      "hyp": "They have the paw ball.",
+      "severity": "mild",
+      "speaker": "Fridriksson-2_1104-2"
+    },
+    {
+      "ref": "of course they're not alive",
+      "hyp": "Of course, you're not alive.",
+      "severity": "mild",
+      "speaker": "Fridriksson-2_1104-2"
+    },
+    {
+      "ref": "and and so the new the new wife she she does not like cinde rella does not like cinderella",
+      "hyp": "and so the new wife she does not like Cinderella it's not like Cinderella",
+      "severity": "mild",
+      "speaker": "Fridriksson-2_1104-2"
+    },
+    {
+      "ref": "and you you can do your wand",
+      "hyp": "and you can do your pond",
+      "severity": "mild",
+      "speaker": "Fridriksson-2_1104-5"
+    },
+    {
+      "ref": "i put the the jelly back in the refrigerator",
+      "hyp": "I'll put the chili back in the refrigerator.",
+      "severity": "mild",
+      "speaker": "Fridriksson-2_1104-5"
+    },
+    {
+      "ref": "and three people i think three people occupational occupational therapists speech",
+      "hyp": "I would, uh, uh,",
+      "severity": "mild",
+      "speaker": "UNH_UNH05c"
+    },
+    {
+      "ref": "and the people i don't know said",
+      "hyp": "And the people, I don't know, said,",
+      "severity": "mild",
+      "speaker": "UNH_UNH05c"
+    },
+    {
+      "ref": "and then close it together",
+      "hyp": "and then projected together.",
+      "severity": "mild",
+      "speaker": "UNH_UNH05c"
+    },
+    {
+      "ref": "now then the prince send his sent over to their house",
+      "hyp": "Then the prince sent his son over to the house.",
+      "severity": "mild",
+      "speaker": "UNH_UNH05c"
+    },
+    {
+      "ref": "and the her prince he looked at her",
+      "hyp": "And, um, the, um, her, um, parents, he looked at her.",
+      "severity": "mild",
+      "speaker": "SCALE_scale17c"
+    },
+    {
+      "ref": "september and it was very x",
+      "hyp": "and it was very",
+      "severity": "mild",
+      "speaker": "SCALE_scale17c"
+    },
+    {
+      "ref": "you hafta be back at twelve o'clock",
+      "hyp": "You have to be back at 12 o'clock.",
+      "severity": "mild",
+      "speaker": "SCALE_scale17c"
+    },
+    {
+      "ref": "it it it the ball that went through the window hit hit a lamp",
+      "hyp": "The ball that went through the window hit a lamp.",
+      "severity": "mild",
+      "speaker": "Fridriksson-2_1104-3"
+    },
+    {
+      "ref": "cinderella's new family didn't like cinderella",
+      "hyp": "Cinderella's new family didn't like Cinderella.",
+      "severity": "mild",
+      "speaker": "Fridriksson-2_1104-3"
+    },
+    {
+      "ref": "wow that's a flower flower",
+      "hyp": "Wow, that's a foul flower.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_249-2"
+    },
+    {
+      "ref": "marriott because i would i would stay stay stay in so many many places",
+      "hyp": "because I would still stay in so many places.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_249-2"
+    },
+    {
+      "ref": "and and but i was feeling oh so negative negative about this surgery or the a stent in the heart",
+      "hyp": "But I was feeling so negative about this surgery or a step in the heart.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_249-2"
+    },
+    {
+      "ref": "that employee tells the second stepsister to try on the shoe",
+      "hyp": "That employee tells the second steps sister to try on the shoe.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_231-2"
+    },
+    {
+      "ref": "and they know it will be storming and thunderstorming soon",
+      "hyp": "And they know it will be storming and thunderstorming soon.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_231-2"
+    },
+    {
+      "ref": "when i have them separated i put the group of whatever color i use i'm doing i put it back in my laundry basket",
+      "hyp": "When I have them separated, I put the group of whatever color I use, I'm doing, I put it back in my laundry basket.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_231-2"
+    },
+    {
+      "ref": "all of a sudden godmother what his name what's his name",
+      "hyp": "All of a sudden, grandpa, what's his name? What's his name.",
+      "severity": null,
+      "speaker": "Kurland_kurland29d"
+    },
+    {
+      "ref": "all of a sudden o'clock two o'clock twelve o'clock",
+      "hyp": "All of a sudden, at 12 o'clock,",
+      "severity": null,
+      "speaker": "Kurland_kurland29d"
+    },
+    {
+      "ref": "i wanna know there's i ladies slippers",
+      "hyp": "I want to show this ladies flippers.",
+      "severity": null,
+      "speaker": "Kurland_kurland29d"
+    },
+    {
+      "ref": "cat is scared to be falling down",
+      "hyp": "cats is scared to be falling down.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-2"
+    },
+    {
+      "ref": "i want to going to eat my friends",
+      "hyp": "I want to go to eat my friends.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-2"
+    },
+    {
+      "ref": "i want to go to books books",
+      "hyp": "I want to go to books, books.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-2"
+    },
+    {
+      "ref": "and then x have until midnight",
+      "hyp": "and then make your own headband makers",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-2"
+    },
+    {
+      "ref": "then then she going to dance away",
+      "hyp": "and then you're going to dance away.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-2"
+    },
+    {
+      "ref": "i am getting better",
+      "hyp": "I'm getting better.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-2"
+    },
+    {
+      "ref": "but the cat was scaredy scaredy cat",
+      "hyp": "but the cat was scary, scary cat.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_171-1"
+    },
+    {
+      "ref": "toto spoke a really much",
+      "hyp": "really much.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_171-1"
+    },
+    {
+      "ref": "so this one is gonna be harder with speaking to people",
+      "hyp": "So this one is going to be harder.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_171-1"
+    },
+    {
+      "ref": "get you if you go to jamaica i can give you beef bone telephone number",
+      "hyp": "If you go to Jamaica, I can give you the phone number.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_171-1"
+    },
+    {
+      "ref": "i believe it was in crown royale was the base",
+      "hyp": "it was a crowd rollout with debates",
+      "severity": "mild",
+      "speaker": "NEURAL-2_171-1"
+    },
+    {
+      "ref": "no arch aphasia rehabilitation something something arch arach",
+      "hyp": "aphasia, rehab, the T something, something. All right.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_171-1"
+    },
+    {
+      "ref": "and the the the aunt and two sisters was invited",
+      "hyp": "And the aunts and two sisters was",
+      "severity": "mild",
+      "speaker": "Kansas_kansas21a"
+    },
+    {
+      "ref": "well like four years after my stroke i couldn't speak at all really",
+      "hyp": "Well, like four years after my stroke, I couldn't speak at all, really.",
+      "severity": "mild",
+      "speaker": "Kansas_kansas21a"
+    },
+    {
+      "ref": "and he pick the soccer ball up and look out the window",
+      "hyp": "And he bricked the soccer ball up and looked out the window",
+      "severity": "mild",
+      "speaker": "Kansas_kansas21a"
+    },
+    {
+      "ref": "i was supposta file them by company name",
+      "hyp": "was supposed to file them by coming",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-2"
+    },
+    {
+      "ref": "my speech i think is is is as good as it going to be",
+      "hyp": "My speech, I think, is as good as it's going to be.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-2"
+    },
+    {
+      "ref": "i went in hospital when i have stroke strokes",
+      "hyp": "I was in hospital when I have stroke.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-2"
+    },
+    {
+      "ref": "and my boss have friends who have managed hotels in vegas",
+      "hyp": "And my boss have friends who have managed hotels in Vegas.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-2"
+    },
+    {
+      "ref": "and then she went home",
+      "hyp": "And then they went home.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1030-4"
+    },
+    {
+      "ref": "and and they lived the happily ever after",
+      "hyp": "and ending this as happily as it can be.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1030-4"
+    },
+    {
+      "ref": "she'd had thought fairy godmother",
+      "hyp": "She had a very good mother.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1030-4"
+    },
+    {
+      "ref": "and he wanna come to the united states",
+      "hyp": "And he wanted to come to the 90s.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-1"
+    },
+    {
+      "ref": "so no no problem before the stroke",
+      "hyp": "So no problem for the stroke.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-1"
+    },
+    {
+      "ref": "the second trip was we raft did a raft trip through the grand canyon for seven days",
+      "hyp": "The second trip was we did a raft cruise through the Grand Canyon for seven days.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-1"
+    },
+    {
+      "ref": "but now it's difficult to draw the clock the first place",
+      "hyp": "But now it's difficult to draw the crux of firm space",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-1"
+    },
+    {
+      "ref": "and luckily i woke my wife up",
+      "hyp": "And luckily I woke my wife up.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-1"
+    },
+    {
+      "ref": "and she married the prince and lived happily ever after",
+      "hyp": "And she married a prince and lived happily ever after.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-1"
+    },
+    {
+      "ref": "and when it gets done put it in the dryer",
+      "hyp": "And when it got drawn, put it in the dryer,",
+      "severity": "mild",
+      "speaker": "NEURAL-2_85-1"
+    },
+    {
+      "ref": "cinderella was the prince and cinderella madly in love",
+      "hyp": "Cinderella was the prince and Cinderella met he in love.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-1"
+    },
+    {
+      "ref": "it was a crab this big this big",
+      "hyp": "It was a clap this big, this big.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-1"
+    },
+    {
+      "ref": "the crab",
+      "hyp": "Like, bruh.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-1"
+    },
+    {
+      "ref": "and he said next time a other hotel he was stay there",
+      "hyp": "And he said next time at other hotel, he would be there.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-1"
+    },
+    {
+      "ref": "take up two slices of bread",
+      "hyp": "They got two slices of bread.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-1"
+    },
+    {
+      "ref": "up two peanut butter jelly",
+      "hyp": "up to peanut butter. Silly.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_287-1"
+    },
+    {
+      "ref": "take me ten years put my bra on",
+      "hyp": "take me 10 years but but but on",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "cats cats and branch of two trees branch of two trees",
+      "hyp": "Cats, cats. And banks of trees, banks of trees.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "first stroke i couldn't say anything",
+      "hyp": "First stroke, I told you it ain't anything.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "and then i x to she they did princess",
+      "hyp": "And then I joined to JDD Panthers.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "barking dog barking dog",
+      "hyp": "Um, um, um, Barton joke. Barton joke",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "every day same time",
+      "hyp": "every day, same time.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "i want to softener",
+      "hyp": "I want to show trainer.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "i put pajamas on",
+      "hyp": "I picked Pajamas on.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_199-1"
+    },
+    {
+      "ref": "turn on the washing machine",
+      "hyp": "on the watching fridge.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_104-2"
+    },
+    {
+      "ref": "plant the soil in the damp soil",
+      "hyp": "plant the stole in the depth soil",
+      "severity": "mild",
+      "speaker": "NEURAL-2_104-2"
+    },
+    {
+      "ref": "sixty fifty",
+      "hyp": "uh six uh states d",
+      "severity": "mild",
+      "speaker": "NEURAL-2_104-2"
+    },
+    {
+      "ref": "and he goes home and get umbrella for rain",
+      "hyp": "And he goes home and gets an umbrella for a",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-1"
+    },
+    {
+      "ref": "and she was able to put me in hospital",
+      "hyp": "she was able to put me in hospital",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-1"
+    },
+    {
+      "ref": "but i can tell you what i ate when my husband and i went to this brunch in saint louis",
+      "hyp": "But I can tell you what I ate when my husband and I went to this brunch in",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-1"
+    },
+    {
+      "ref": "ted williams william come in my grandfather's bar bar all the time",
+      "hyp": "Ted Wilburn's W-I-L-L-I-A-M. I'm in my game for a bar all the time.",
+      "severity": "mild",
+      "speaker": "NEURAL-2_69-1"
+    },
+    {
+      "ref": "just a minute",
+      "hyp": "Gosh, you mean it.",
+      "severity": null,
+      "speaker": "Kurland_kurland29e"
+    },
+    {
+      "ref": "and i can't talk",
+      "hyp": "And I can't stop.",
+      "severity": null,
+      "speaker": "Kurland_kurland29e"
+    },
+    {
+      "ref": "all of a sudden mind pretty good",
+      "hyp": "and all of the shoddling.",
+      "severity": null,
+      "speaker": "Kurland_kurland29e"
+    },
+    {
+      "ref": "and all of a sudden i can't talk and write",
+      "hyp": "and all of a sudden again I can't talk and write",
+      "severity": null,
+      "speaker": "Kurland_kurland29e"
+    },
+    {
+      "ref": "and the x and and dog and hor se",
+      "hyp": "and the vies and tall and hoar.",
+      "severity": "moderate",
+      "speaker": "Williamson_williamson11a"
+    },
+    {
+      "ref": "and gowns gowns",
+      "hyp": "And gowns.",
+      "severity": "moderate",
+      "speaker": "Williamson_williamson11a"
+    },
+    {
+      "ref": "the prince and cinderella and dancing",
+      "hyp": "DRINKS AND CINDER AND EATS.",
+      "severity": "moderate",
+      "speaker": "Williamson_williamson11a"
+    },
+    {
+      "ref": "it toast on butter and spread it spread it",
+      "hyp": "Toast on butter and spread it. Spread it.",
+      "severity": "moderate",
+      "speaker": "Williamson_williamson11a"
+    },
+    {
+      "ref": "no thanks",
+      "hyp": "and",
+      "severity": "moderate",
+      "speaker": "Williamson_williamson11a"
+    },
+    {
+      "ref": "and sleep sleep",
+      "hyp": "Seep. Seep.",
+      "severity": "moderate",
+      "speaker": "Williamson_williamson11a"
+    },
+    {
+      "ref": "i have it's with the the peanut butter for my my this way",
+      "hyp": "I have \u2013 it's with the peanut butter for my \u2013 this way.",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "a a a little girl",
+      "hyp": "I loved the girl.",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "then what happened the it was twelve it was going to be two it's called with it will called the about three minutes to twelve",
+      "hyp": "Then what happened, it was a 12, it was on to be a two, it's called, with, it was",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "i had as i said this this doctor knew about the the stroke and the aphasia",
+      "hyp": "I had, as I said, this doctor knew about the stroke.",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "and then they oh my goodness they saw the little daughter",
+      "hyp": "and then this oh my goodness they saw the little",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "i course i i i also know know but and how this woman was and i i my white face",
+      "hyp": "Of course, I also know, but anyhow, this woman was, and I put in my work face.",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "and they were going to go the they know about they were going to go to a ball for the two two stepdaughters",
+      "hyp": "and they were going to go\u2014they know about\u2014they were going to call to a ball for the two",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "it was a magnificent thing this beautiful thing and and the the daughter",
+      "hyp": "It was a magnificent thing, this beautiful thing.",
+      "severity": "mild",
+      "speaker": "Thompson_thompson11a"
+    },
+    {
+      "ref": "and then you have a peanut butter and and jelly sandwich",
+      "hyp": "And then you have a peanut butter and jelly sandwich.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1072-4"
+    },
+    {
+      "ref": "the the daddy brought the cinderella and and introduced her to the woman and the the girl",
+      "hyp": "The daddy brought the Cinderella and introduced her to the woman and the little girl.",
+      "severity": "moderate",
+      "speaker": "Fridriksson-2_1072-4"
+    },
+    {
+      "ref": "and the prince said",
+      "hyp": "And the Pence said,",
+      "severity": "mild",
+      "speaker": "SCALE_scale17a"
+    },
+    {
+      "ref": "cinderella said",
+      "hyp": "I said,",
+      "severity": "mild",
+      "speaker": "SCALE_scale17a"
+    },
+    {
+      "ref": "cinderella was sad",
+      "hyp": "Senuela was sad.",
+      "severity": "mild",
+      "speaker": "SCALE_scale17a"
+    },
+    {
+      "ref": "i know it's a stroke",
+      "hyp": "I know it's a joke.",
+      "severity": "mild",
+      "speaker": "TAP_tap18a"
+    },
+    {
+      "ref": "so two and also cinderella had perfectly fine for the glass glass slipper",
+      "hyp": "Also, Gingerola had perfectly fine for the glass flipper.",
+      "severity": "mild",
+      "speaker": "TAP_tap18a"
+    },
+    {
+      "ref": "so i what i was thinking about the car my",
+      "hyp": "So I was thinking about the car.",
+      "severity": "mild",
+      "speaker": "TAP_tap18a"
+    }
+  ]
+}

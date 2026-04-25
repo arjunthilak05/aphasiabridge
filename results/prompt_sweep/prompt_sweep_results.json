@@ -1,0 +1,404 @@
+{
+  "model": "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit",
+  "dev_manifest": "/data/kl_dev/dataset_wan/data_gemma/aphasiabank/aphasiabank_si_val.jsonl",
+  "n_dev": 50,
+  "decoding": {
+    "rep_penalty": 1.3,
+    "no_repeat_ngram": 4,
+    "num_beams": 5,
+    "length_penalty": 1.0,
+    "max_new_tokens": 200
+  },
+  "variants": [
+    {
+      "variant": "literal-emphasis",
+      "system": "Transcribe word-for-word, including repetitions and partial words. Do not auto-correct or paraphrase.",
+      "user": "Please transcribe this audio.",
+      "no_system": false,
+      "n_total": 50,
+      "n_errors": 3,
+      "wer_lowercase": 0.5366,
+      "wer_whisperEN": 0.4764,
+      "per_severity_whisperEN": {
+        "moderate": 0.5946,
+        "severe": 0.619,
+        "mild": 0.4031,
+        "unknown": 0.3729
+      },
+      "predictions": [
+        {
+          "ref": "you go all kingdom",
+          "hyp": "go all kingen",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1034-4"
+        },
+        {
+          "ref": "anyway all of a sudden together with the the the friend he's a probably general",
+          "hyp": "Anyway all of us together with the the friend he's probably you know GE",
+          "severity": "severe",
+          "speaker": "Fridriksson-2_1003-LARC"
+        },
+        {
+          "ref": "and he hit kicks high",
+          "hyp": "and the kids hi",
+          "severity": "moderate",
+          "speaker": "Williamson_williamson06a"
+        },
+        {
+          "ref": "and then then i wipe a spoon off of the",
+          "hyp": "and then and i write a pool of the",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1030-3"
+        },
+        {
+          "ref": "and she rode the she rode around with the woman real that this really handsome man",
+          "hyp": "she rode the she rode ran with a woman real that this really hustle man",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1117-1"
+        },
+        {
+          "ref": "two years firstnamed firstnamed help me",
+          "hyp": "too he is tennis tennis have",
+          "severity": "moderate",
+          "speaker": "SCALE_scale04a"
+        },
+        {
+          "ref": "the rain rain",
+          "hyp": "Alright, right.",
+          "severity": "severe",
+          "speaker": "Fridriksson_fridriksson06a"
+        },
+        {
+          "ref": "we're enjoying new local restaurants which are way way better than anything in the valley which is or phoenix to us",
+          "hyp": "or enjoying new local restaurants twitter may way better than anything you know in the valley which is or phoenix to us",
+          "severity": "mild",
+          "speaker": "NEURAL-2_122-1"
+        },
+        {
+          "ref": "state college",
+          "hyp": "[{\"type\": \"text\", \"text\": \"teach\"}]",
+          "severity": "mild",
+          "speaker": "Williamson_williamson14b"
+        },
+        {
+          "ref": "so the the man is sitting about by the window",
+          "hyp": "So the the man is sitting about by the",
+          "severity": null,
+          "speaker": "CMU_cmu01b"
+        }
+      ]
+    },
+    {
+      "variant": "asr-prefix",
+      "system": "You are an assistant that transcribes speech accurately.",
+      "user": "Transcribe the following audio:",
+      "no_system": false,
+      "n_total": 50,
+      "n_errors": 3,
+      "wer_lowercase": 0.6123,
+      "wer_whisperEN": 0.5681,
+      "per_severity_whisperEN": {
+        "moderate": 0.6014,
+        "severe": 0.7619,
+        "mild": 0.5606,
+        "unknown": 0.4407
+      },
+      "predictions": [
+        {
+          "ref": "you go all kingdom",
+          "hyp": "Go all kingen.",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1034-4"
+        },
+        {
+          "ref": "anyway all of a sudden together with the the the friend he's a probably general",
+          "hyp": "Anyway, I was all together with the the friend he's at probably, you know, GE",
+          "severity": "severe",
+          "speaker": "Fridriksson-2_1003-LARC"
+        },
+        {
+          "ref": "and he hit kicks high",
+          "hyp": "and the kids hi",
+          "severity": "moderate",
+          "speaker": "Williamson_williamson06a"
+        },
+        {
+          "ref": "and then then i wipe a spoon off of the",
+          "hyp": "and then i write a poem of the",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1030-3"
+        },
+        {
+          "ref": "and she rode the she rode around with the woman real that this really handsome man",
+          "hyp": "She rode the she rode ran with a woman real that this really hustle man",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1117-1"
+        },
+        {
+          "ref": "two years firstnamed firstnamed help me",
+          "hyp": "to he is tennis tennis have",
+          "severity": "moderate",
+          "speaker": "SCALE_scale04a"
+        },
+        {
+          "ref": "the rain rain",
+          "hyp": "Alright, I'm ready.",
+          "severity": "severe",
+          "speaker": "Fridriksson_fridriksson06a"
+        },
+        {
+          "ref": "we're enjoying new local restaurants which are way way better than anything in the valley which is or phoenix to us",
+          "hyp": "We're enjoying new local restaurants with her may way better than anything, you know, in the Valley which is Press or Phoenix to us.",
+          "severity": "mild",
+          "speaker": "NEURAL-2_122-1"
+        },
+        {
+          "ref": "state college",
+          "hyp": "I'm sorry, I can't transcribe the audio because you haven't provided any.",
+          "severity": "mild",
+          "speaker": "Williamson_williamson14b"
+        },
+        {
+          "ref": "so the the man is sitting about by the window",
+          "hyp": "So the man is saying about by the wind",
+          "severity": null,
+          "speaker": "CMU_cmu01b"
+        }
+      ]
+    },
+    {
+      "variant": "aphasia-aware",
+      "system": "This is speech from a person with aphasia. Preserve repetitions, fillers, and partial words exactly. Do not auto-correct.",
+      "user": "Please transcribe this audio.",
+      "no_system": false,
+      "n_total": 50,
+      "n_errors": 3,
+      "wer_lowercase": 0.695,
+      "wer_whisperEN": 0.5755,
+      "per_severity_whisperEN": {
+        "moderate": 0.6149,
+        "severe": 0.7143,
+        "mild": 0.5714,
+        "unknown": 0.4407
+      },
+      "predictions": [
+        {
+          "ref": "you go all kingdom",
+          "hyp": "Go all kingen.",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1034-4"
+        },
+        {
+          "ref": "anyway all of a sudden together with the the the friend he's a probably general",
+          "hyp": "Anyway, I was all together with the the friend he's at probably, you know, GE",
+          "severity": "severe",
+          "speaker": "Fridriksson-2_1003-LARC"
+        },
+        {
+          "ref": "and he hit kicks high",
+          "hyp": "and the kids hi",
+          "severity": "moderate",
+          "speaker": "Williamson_williamson06a"
+        },
+        {
+          "ref": "and then then i wipe a spoon off of the",
+          "hyp": "and then in i write a poem of the",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1030-3"
+        },
+        {
+          "ref": "and she rode the she rode around with the woman real that this really handsome man",
+          "hyp": "She rode the she rode ran with a woman real that this really hustle man.",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1117-1"
+        },
+        {
+          "ref": "two years firstnamed firstnamed help me",
+          "hyp": "Too, he is tennis tennis have.",
+          "severity": "moderate",
+          "speaker": "SCALE_scale04a"
+        },
+        {
+          "ref": "the rain rain",
+          "hyp": "My rain.",
+          "severity": "severe",
+          "speaker": "Fridriksson_fridriksson06a"
+        },
+        {
+          "ref": "we're enjoying new local restaurants which are way way better than anything in the valley which is or phoenix to us",
+          "hyp": "We're enjoying new local restaurants with her may way better than anything, you know, in the valley which is or Phoenix to us.",
+          "severity": "mild",
+          "speaker": "NEURAL-2_122-1"
+        },
+        {
+          "ref": "state college",
+          "hyp": "[silence]",
+          "severity": "mild",
+          "speaker": "Williamson_williamson14b"
+        },
+        {
+          "ref": "so the the man is sitting about by the window",
+          "hyp": "So, the man is saying about by the wind.",
+          "severity": null,
+          "speaker": "CMU_cmu01b"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "system": "You are an assistant that transcribes speech accurately.",
+      "user": "Please transcribe this audio.",
+      "no_system": false,
+      "n_total": 50,
+      "n_errors": 3,
+      "wer_lowercase": 0.6667,
+      "wer_whisperEN": 0.6056,
+      "per_severity_whisperEN": {
+        "moderate": 0.5946,
+        "severe": 0.7619,
+        "mild": 0.6364,
+        "unknown": 0.4746
+      },
+      "predictions": [
+        {
+          "ref": "you go all kingdom",
+          "hyp": "Go all kingen.",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1034-4"
+        },
+        {
+          "ref": "anyway all of a sudden together with the the the friend he's a probably general",
+          "hyp": "Anyway, I was all together with the the friend he's at probably, you know, GE.",
+          "severity": "severe",
+          "speaker": "Fridriksson-2_1003-LARC"
+        },
+        {
+          "ref": "and he hit kicks high",
+          "hyp": "And the kids hi",
+          "severity": "moderate",
+          "speaker": "Williamson_williamson06a"
+        },
+        {
+          "ref": "and then then i wipe a spoon off of the",
+          "hyp": "and then in i write a poem of the",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1030-3"
+        },
+        {
+          "ref": "and she rode the she rode around with the woman real that this really handsome man",
+          "hyp": "She rode the she rode ran with a woman real that this really hussle man",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1117-1"
+        },
+        {
+          "ref": "two years firstnamed firstnamed help me",
+          "hyp": "to he is tennis tennis have",
+          "severity": "moderate",
+          "speaker": "SCALE_scale04a"
+        },
+        {
+          "ref": "the rain rain",
+          "hyp": "Alright.",
+          "severity": "severe",
+          "speaker": "Fridriksson_fridriksson06a"
+        },
+        {
+          "ref": "we're enjoying new local restaurants which are way way better than anything in the valley which is or phoenix to us",
+          "hyp": "We're enjoying new local restaurants with her may way better than anything, you know, in the Valley which is Press or Phoenix to us.",
+          "severity": "mild",
+          "speaker": "NEURAL-2_122-1"
+        },
+        {
+          "ref": "state college",
+          "hyp": "I'm sorry, I cannot transcribe the audio because you have not provided any audio.",
+          "severity": "mild",
+          "speaker": "Williamson_williamson14b"
+        },
+        {
+          "ref": "so the the man is sitting about by the window",
+          "hyp": "So the man is saying about by the wind",
+          "severity": null,
+          "speaker": "CMU_cmu01b"
+        }
+      ]
+    },
+    {
+      "variant": "no-system-literal",
+      "system": "",
+      "user": "Transcribe the audio verbatim, preserving all repetitions and partial words.",
+      "no_system": true,
+      "n_total": 50,
+      "n_errors": 3,
+      "wer_lowercase": 0.7707,
+      "wer_whisperEN": 0.7136,
+      "per_severity_whisperEN": {
+        "moderate": 0.6554,
+        "severe": 0.619,
+        "mild": 0.8333,
+        "unknown": 0.4915
+      },
+      "predictions": [
+        {
+          "ref": "you go all kingdom",
+          "hyp": "Go all kingen",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1034-4"
+        },
+        {
+          "ref": "anyway all of a sudden together with the the the friend he's a probably general",
+          "hyp": "Anyway, I was sending together with the the friend he's said probably, you know, GE",
+          "severity": "severe",
+          "speaker": "Fridriksson-2_1003-LARC"
+        },
+        {
+          "ref": "and he hit kicks high",
+          "hyp": "and the kids hi",
+          "severity": "moderate",
+          "speaker": "Williamson_williamson06a"
+        },
+        {
+          "ref": "and then then i wipe a spoon off of the",
+          "hyp": "and then in i write a poem of the",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1030-3"
+        },
+        {
+          "ref": "and she rode the she rode around with the woman real that this really handsome man",
+          "hyp": "she rode the one she rode ran with a woman real that this really hustle man",
+          "severity": "moderate",
+          "speaker": "Fridriksson-2_1117-1"
+        },
+        {
+          "ref": "two years firstnamed firstnamed help me",
+          "hyp": "two piece tennis tennis have",
+          "severity": "moderate",
+          "speaker": "SCALE_scale04a"
+        },
+        {
+          "ref": "the rain rain",
+          "hyp": "Alright, rain.",
+          "severity": "severe",
+          "speaker": "Fridriksson_fridriksson06a"
+        },
+        {
+          "ref": "we're enjoying new local restaurants which are way way better than anything in the valley which is or phoenix to us",
+          "hyp": "are enjoying new local restaurants with more way better than anything you know in the valley which is press or phoenix to us",
+          "severity": "mild",
+          "speaker": "NEURAL-2_122-1"
+        },
+        {
+          "ref": "state college",
+          "hyp": "te a j",
+          "severity": "mild",
+          "speaker": "Williamson_williamson14b"
+        },
+        {
+          "ref": "so the the man is sitting about by the window",
+          "hyp": "So they the man is sitting about by the winder",
+          "severity": null,
+          "speaker": "CMU_cmu01b"
+        }
+      ]
+    }
+  ]
+}

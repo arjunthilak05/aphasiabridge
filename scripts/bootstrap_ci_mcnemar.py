@@ -133,8 +133,8 @@ def main():
     # D4b full preds
     p = ROOT / "outputs/h100_lora_daniel_v4b_full/reeval_summary.json"
     if p.exists():
-        sources["R1-D4b (beam=5, rep=1.3, ngram=4)"] = json.loads(p.read_text())["result"]["after_raw"]
-        sources["BASE Gemma 4 E4B (beam=5, same decode as D4b)"] = json.loads(p.read_text())["result"]["base_raw"]
+        sources["R1-D4b (beam=5, rep=1.3, ngram=4)"] = json.loads(p.read_text())["after_raw"]
+        sources["BASE Gemma 4 E4B (beam=5, same decode as D4b)"] = json.loads(p.read_text())["base_raw"]
 
     # Lang-only AFTER (full)
     p = ROOT / "outputs/h100_lora_lang_only/run_summary.json"

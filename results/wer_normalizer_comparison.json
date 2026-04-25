@@ -1,0 +1,274 @@
+[
+  {
+    "tag": "D4a beam=5",
+    "pass": "BASE",
+    "n_total": 50,
+    "WER_lowercase": 0.5962,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.5157,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 1.0476,
+      "mild": 0.3896,
+      "unknown": 0.4471
+    },
+    "WER_BasicNorm": 0.5597,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "D4a beam=5",
+    "pass": "AFTER",
+    "n_total": 50,
+    "WER_lowercase": 0.5,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.4528,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.8095,
+      "mild": 0.3474,
+      "unknown": 0.4824
+    },
+    "WER_BasicNorm": 0.4969,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "D4b beam=5 \u2605",
+    "pass": "BASE",
+    "n_total": 50,
+    "WER_lowercase": 0.5962,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.5157,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 1.0476,
+      "mild": 0.3896,
+      "unknown": 0.4471
+    },
+    "WER_BasicNorm": 0.5597,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "D4b beam=5 \u2605",
+    "pass": "AFTER",
+    "n_total": 50,
+    "WER_lowercase": 0.4658,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.4277,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.7143,
+      "mild": 0.3344,
+      "unknown": 0.4824
+    },
+    "WER_BasicNorm": 0.4633,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "Lang-only beam=5",
+    "pass": "BASE",
+    "n_total": 50,
+    "WER_lowercase": 0.5962,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.5157,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 1.0476,
+      "mild": 0.3896,
+      "unknown": 0.4471
+    },
+    "WER_BasicNorm": 0.5597,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "Lang-only beam=5",
+    "pass": "AFTER",
+    "n_total": 50,
+    "WER_lowercase": 0.4722,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.4256,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.6667,
+      "mild": 0.3442,
+      "unknown": 0.4824
+    },
+    "WER_BasicNorm": 0.4717,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "Mixed beam=5",
+    "pass": "BASE",
+    "n_total": 50,
+    "WER_lowercase": 0.5962,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.5157,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 1.0476,
+      "mild": 0.3896,
+      "unknown": 0.4471
+    },
+    "WER_BasicNorm": 0.5597,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "Mixed beam=5",
+    "pass": "AFTER",
+    "n_total": 50,
+    "WER_lowercase": 0.4808,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.4403,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.7262,
+      "mild": 0.3636,
+      "unknown": 0.4353
+    },
+    "WER_BasicNorm": 0.4801,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "D4a beam=1 (Phase-1)",
+    "pass": "BASE",
+    "n_total": 50,
+    "WER_lowercase": 0.6346,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.5409,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.881,
+      "mild": 0.4545,
+      "unknown": 0.5176
+    },
+    "WER_BasicNorm": 0.587,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "D4a beam=1 (Phase-1)",
+    "pass": "AFTER",
+    "n_total": 50,
+    "WER_lowercase": 0.485,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.434,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.7024,
+      "mild": 0.3474,
+      "unknown": 0.4824
+    },
+    "WER_BasicNorm": 0.4801,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "D4b beam=1 (Phase-1)",
+    "pass": "BASE",
+    "n_total": 50,
+    "WER_lowercase": 0.6346,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.5409,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.881,
+      "mild": 0.4545,
+      "unknown": 0.5176
+    },
+    "WER_BasicNorm": 0.587,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "D4b beam=1 (Phase-1)",
+    "pass": "AFTER",
+    "n_total": 50,
+    "WER_lowercase": 0.515,
+    "n_lowercase": 44,
+    "WER_WhisperEN": 0.4633,
+    "n_WhisperEN": 44,
+    "per_severity_WhisperEN": {
+      "moderate": 0.7857,
+      "mild": 0.3701,
+      "unknown": 0.4824
+    },
+    "WER_BasicNorm": 0.5094,
+    "n_BasicNorm": 44
+  },
+  {
+    "tag": "Lang-only in-script (beam=1)",
+    "pass": "BASE",
+    "n_total": 220,
+    "WER_lowercase": 0.5561,
+    "n_lowercase": 196,
+    "WER_WhisperEN": 0.4744,
+    "n_WhisperEN": 195,
+    "per_severity_WhisperEN": {
+      "moderate": 0.5692,
+      "mild": 0.4742,
+      "unknown": 0.3419
+    },
+    "WER_BasicNorm": 0.5239,
+    "n_BasicNorm": 195
+  },
+  {
+    "tag": "Lang-only in-script (beam=1)",
+    "pass": "AFTER",
+    "n_total": 220,
+    "WER_lowercase": 0.5539,
+    "n_lowercase": 196,
+    "WER_WhisperEN": 0.5056,
+    "n_WhisperEN": 196,
+    "per_severity_WhisperEN": {
+      "moderate": 0.7911,
+      "mild": 0.4463,
+      "unknown": 0.3746
+    },
+    "WER_BasicNorm": 0.5516,
+    "n_BasicNorm": 196
+  },
+  {
+    "tag": "Mixed in-script (beam=1)",
+    "pass": "BASE",
+    "n_total": 220,
+    "WER_lowercase": 0.5561,
+    "n_lowercase": 196,
+    "WER_WhisperEN": 0.4744,
+    "n_WhisperEN": 195,
+    "per_severity_WhisperEN": {
+      "moderate": 0.5692,
+      "mild": 0.4742,
+      "unknown": 0.3419
+    },
+    "WER_BasicNorm": 0.5239,
+    "n_BasicNorm": 195
+  },
+  {
+    "tag": "Mixed in-script (beam=1)",
+    "pass": "AFTER",
+    "n_total": 220,
+    "WER_lowercase": 0.5728,
+    "n_lowercase": 196,
+    "WER_WhisperEN": 0.5576,
+    "n_WhisperEN": 196,
+    "per_severity_WhisperEN": {
+      "moderate": 0.8198,
+      "mild": 0.5201,
+      "unknown": 0.364
+    },
+    "WER_BasicNorm": 0.5923,
+    "n_BasicNorm": 196
+  },
+  {
+    "tag": "Whisper-Large-v3 zero-shot",
+    "pass": "Whisper-zero-shot",
+    "n_total": 220,
+    "WER_lowercase": 0.7927,
+    "n_lowercase": 220,
+    "WER_WhisperEN": 0.7581,
+    "n_WhisperEN": 220,
+    "per_severity_WhisperEN": {
+      "moderate": 2.0293,
+      "mild": 0.5015,
+      "unknown": 0.2779
+    },
+    "WER_BasicNorm": 0.828,
+    "n_BasicNorm": 220
+  }
+]

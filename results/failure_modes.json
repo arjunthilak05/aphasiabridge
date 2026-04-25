@@ -1,0 +1,67 @@
+[
+  {
+    "model": "Whisper-Large-v3 zero-shot",
+    "n_total": 220,
+    "categories": {
+      "word_error": 158,
+      "long_hallucination": 4,
+      "repeat_loop": 58
+    },
+    "wer_per_category": {
+      "word_error": 0.5382,
+      "long_hallucination": 13.8235,
+      "repeat_loop": 0.6377
+    }
+  },
+  {
+    "model": "Whisper-Large-v3 aggressive",
+    "n_total": 220,
+    "categories": {
+      "word_error": 162,
+      "repeat_loop": 58
+    },
+    "wer_per_category": {
+      "word_error": 0.5513,
+      "repeat_loop": 0.3415
+    }
+  },
+  {
+    "model": "BASE Gemma 4 (lang-only base)",
+    "n_total": 220,
+    "categories": {
+      "repeat_loop": 78,
+      "audio_processor_err": 24,
+      "word_error": 118
+    },
+    "wer_per_category": {
+      "repeat_loop": 0.4787,
+      "word_error": 0.6583
+    }
+  },
+  {
+    "model": "Lang-only LoRA AFTER",
+    "n_total": 220,
+    "categories": {
+      "repeat_loop": 84,
+      "word_error": 112,
+      "audio_processor_err": 24
+    },
+    "wer_per_category": {
+      "repeat_loop": 0.5255,
+      "word_error": 0.6011
+    }
+  },
+  {
+    "model": "R1-D4b beam=5 (full preds)",
+    "n_total": 220,
+    "categories": {
+      "repeat_loop": 82,
+      "word_error": 114,
+      "audio_processor_err": 24
+    },
+    "wer_per_category": {
+      "repeat_loop": 0.4313,
+      "word_error": 0.5947
+    }
+  }
+]
