@@ -552,3 +552,46 @@ Paper reference (Jiang et al. 2026, B1 column): Whisper-Large-v3 = 39.97 % WER o
 ### Architecture decision
 
 **Whisper-Large-v3 zero-shot (0.7927) is WORSE than BASE Gemma 4 E4B (0.6138) on this test set.** CONTINGENCY.md Strategy A (Whisper-front-end + Gemma-intent) is OFF the table — using Whisper as the ASR layer would strictly degrade quality. **Ship path: continue with Gemma 4 audio LoRA refinements; BASE Gemma is genuinely strong on aphasic English.**
+
+## S. Task 1 + Task 3 results (beam=5 + freeze-audio)
+
+### Task 1 — beam=5 decoding on top of rep_penalty + no_repeat_ngram
+
+Adds beam search 5 to the Phase-1 gen kwargs. Tests whether beam search closes more gap.
+
+| Run | beam=1 BASE | beam=1 AFTER | **beam=5 BASE** | **beam=5 AFTER** | Δ vs beam=5 BASE |
+|---|---|---|---|---|---|
+| D4a | 0.6138 | 0.5254 | **0.5658** | **0.5092** | -0.0566 |
+| D4b | 0.6138 | 0.5415 | **0.5658** | **0.4946** | -0.0712 |
+
+### Per-severity AFTER (beam=5)
+
+| Severity | BASE | D4a | D4b |
+|---|---|---|---|
+| mild | 0.5567 | 0.5158 | 0.5025 |
+| moderate | 0.6887 | 0.5567 | 0.5356 |
+| unknown | 0.4364 | 0.4145 | 0.4036 |
+
+### Task 3 — language-only LoRA (audio encoder frozen)
+
+Smaller LoRA capacity (no audio modules) → lowest over-fitting risk on 3,956 clips.
+`target_modules` = `[q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]` only.
+`modules_to_save` = `[lm_head, embed_tokens]`. Audio encoder weights untouched.
+
+```
+records: 3956, lora_r/α: 8/16, lr: 5e-05
+elapsed: 14.8 min, peak VRAM: 26.87 GB
+final train loss: 1.621
+WER  BASE: 0.556  AFTER: 0.554  Δ: -0.002
+per-severity BASE:  {'moderate': 0.649, 'mild': 0.557, 'unknown': 0.422}
+per-severity AFTER: {'moderate': 0.81, 'mild': 0.502, 'unknown': 0.425}
+```
+
+### Final scoreboard (lower = better)
+
+```
+BASE Gemma 4 (beam=5 + rep_penalty 1.3 + no_repeat_ngram 4)  = 0.5658
+D4a (beam=5)                                                = 0.5092
+D4b (beam=5)                                                = 0.4946
+Lang-only LoRA (beam=1, gen kwargs match training script)   = 0.554
+```
