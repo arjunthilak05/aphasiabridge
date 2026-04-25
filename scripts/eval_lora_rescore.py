@@ -151,6 +151,7 @@ def main():
             audio, sr = sf.read(r["audio_path"])
             if sr != 16000:
                 results.append({"ref": r["transcript"], "best_hyp": "<ERROR:bad_sr>",
+                                "best_hyp_beam_only": "<ERROR:bad_sr>",
                                 "severity": r.get("severity"), "speaker": r.get("participant_id"),
                                 "candidates": []})
                 continue
@@ -177,6 +178,7 @@ def main():
                             "candidates": scored})
         except Exception as e:
             results.append({"ref": r["transcript"], "best_hyp": f"<ERROR:{type(e).__name__}>",
+                            "best_hyp_beam_only": f"<ERROR:{type(e).__name__}>",
                             "severity": r.get("severity"), "speaker": r.get("participant_id"),
                             "candidates": []})
         if (i + 1) % 25 == 0:
