@@ -163,6 +163,9 @@ def main():
     ap.add_argument("--full-finetune", action="store_true",
                     help="Full fine-tune instead of LoRA: load_in_4bit=False, full_finetuning=True, "
                          "skip get_peft_model. Use lower LR (~3e-5). R2 of H100 runbook.")
+    ap.add_argument("--gradient-checkpointing", action="store_true",
+                    help="Trade compute for activation memory (~10 GB savings, ~25%% slower). "
+                         "Required for full-FT in DDP mode where each rank holds the full model.")
     args = ap.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -287,6 +290,8 @@ def main():
             max_length=args.max_seq_length,
             bf16=True,
             fp16=False,
+            gradient_checkpointing=args.gradient_checkpointing,
+            gradient_checkpointing_kwargs={"use_reentrant": False} if args.gradient_checkpointing else None,
         ),
     )
 
