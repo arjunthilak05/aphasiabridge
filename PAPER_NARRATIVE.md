@@ -108,6 +108,53 @@ What we did, what it gave us, and what we kept.
 - Statistical analysis: `scripts/bootstrap_ci_mcnemar.py` (1000 bootstrap, two-sided binomial McNemar).
 - Failure-mode taxonomy: `scripts/failure_modes.py` (regex-based).
 
+## Tier-2 negative results (post-publication push past R1-D4b)
+
+After Tier-1 closed at R1-D4b WER 0.456 (WhisperEN), we attempted two methods to push the moderate-bucket WER below Whisper-aggressive's 0.476:
+
+### Lever A — Per-speaker SS-FT (paper-style B3 personalization)
+
+5-speaker pilot on `aphasiabank_ss_train.jsonl` (~30 train clips per speaker, 80 SFT steps from R1-D4b weights, lr=5e-5, eff batch 4). Eval on each speaker's 4-8 held-out test clips:
+
+```
+Speaker (severity)        D4b → SS-FT (lowercase)   Δ
+Thompson  (mild)          0.488 → 0.480             −0.008
+Adler     (mild)          0.964 → 0.964             0.000
+Williamson (moderate)     0.688 → 0.656             −0.031
+ACWT      (moderate)      0.444 → 0.519             +0.074  (regression)
+Kurland   (unknown)       0.643 → 0.643             0.000
+average                                              ~0.000
+```
+
+**Null result.** Per-speaker variance dominates the small-sample signal (4-8 test clips per speaker). The plan's stop rule (avg Δ ≥ −0.05) was not met; we did not scale to 53 speakers. Honest finding for the paper: *Jiang's B3 advantage (SI→SS) is not reproducible at our test-clip-per-speaker density. SS-FT requires either more held-out test clips per speaker, or a within-speaker held-out *speaking task* (pre-vs-post protocol task), to detect <5 pp moves.*
+
+### Lever D — Top-5 beam + Gemma text-only LM rescore
+
+Decoded top-5 beam hypotheses with R1-D4b, rescored each by P("this is plausible aphasic speech | hypothesis") under Gemma 4 in text-only mode, picked argmax of `combined = beam_score + lm_weight × lm_score`. LM-weight sweep on the saved candidates:
+
+```
+weight    lowercase WER    WhisperEN WER
+0.00      0.4946           0.4562   ← beam-only baseline
+0.05      0.4941           0.4557   ← Δ ≈ noise
+0.10      0.4951           0.4573
+0.50      0.4973           0.4594
+1.00      0.4968           0.4584
+2.00      0.5076           0.4706   ← LM weight starts hurting
+10.00     0.5124           0.4748
+```
+
+**Null result, with directionality finding:** stronger LM pull (weight ≥ 0.5) actively hurts WER. The LM prefers fluent English; aphasic transcription needs to follow the *acoustically* faithful hypothesis even when it's disfluent. Self-rescoring (same model for ASR and LM) is degenerate — there's no diverse signal to leverage.
+
+### What we are *not* doing in Tier-2
+
+- Lever F (SpecAugment + speed perturbation retrain, ~4 h): expected ≤ 3 pp gain, low priority given the 11 pp gap to Whisper-aggressive.
+- Lever B (relax filter + retrain on ~6 K clips, ~1 day): expected ≤ 4 pp gain, deferred.
+- Lever E (ROVER ensemble Whisper + R1-D4b): would muddy the on-device single-model story.
+
+**R1-D4b at 0.456 WhisperEN / 0.527 moderate is our final paper number.** The negative SS-FT and rescore results above are also reportable findings for the paper.
+
+---
+
 ## Methodological notes for paper reviewers
 
 - **AphasiaBank severity binning**: the catalog uses Bakas/Kertesz cut-points (mild 76+, moderate 51–75, severe 26–50, very_severe 0–25), *not* the textbook 26–50 = moderate convention. State this explicitly.
