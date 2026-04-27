@@ -213,7 +213,7 @@ def main():
             eval_dataset=val_dataset,
             data_collator=collator,
             compute_metrics=compute_metrics if val_dataset is not None else None,
-            tokenizer=processor.feature_extractor,
+            processing_class=processor.feature_extractor,
         )
         torch.cuda.reset_peak_memory_stats()
         t0 = time.time()
