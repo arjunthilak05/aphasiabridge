@@ -21,8 +21,25 @@ torch._dynamo.config.disable = True
 torch._dynamo.config.suppress_errors = True
 
 from unsloth import FastModel
+import numpy as np
 import soundfile as sf
 import jiwer
+
+
+def pad_audio_to_safe_length(audio, sr=16000, quantum_s=1.0):
+    """Pad audio to the next multiple of `quantum_s` seconds with trailing zeros.
+
+    Phase 0a: works around Gemma 4's `Audio features and audio tokens do not match`
+    edge case (24 NEURAL-corpus clips on our ss_test). The processor's audio-token-
+    placeholder count and the audio-encoder's feature-count diverge for certain
+    durations; rounding the input duration up to the next 1-second boundary makes
+    the math align cleanly. Whisper baselines unaffected (they use their own
+    feature extractor)."""
+    target = int(np.ceil(audio.shape[0] / (sr * quantum_s)) * sr * quantum_s)
+    if target <= audio.shape[0]:
+        return audio
+    pad = target - audio.shape[0]
+    return np.concatenate([audio, np.zeros(pad, dtype=audio.dtype)])
 
 MODEL_ID = "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit"
 SYSTEM_PROMPT = "You are an assistant that transcribes speech accurately."
@@ -112,6 +129,9 @@ def main():
                     outs.append({"ref": r["transcript"], "hyp": "<ERROR:bad_sr>",
                                  "severity": r.get("severity")})
                     continue
+                # Phase 0a: pad to next 1-second boundary to avoid Gemma 4's
+                # audio-token alignment edge case on certain durations.
+                audio = pad_audio_to_safe_length(audio, sr=16000, quantum_s=1.0)
                 messages = []
                 if not args.no_system_prompt:
                     messages.append({"role": "system",
