@@ -111,12 +111,10 @@ def main():
     model = WhisperForConditionalGeneration.from_pretrained(
         args.model, torch_dtype=torch.float32,
     )
-    # English-only generation
-    model.generation_config.language = "en"
+    # English-only generation. HF Whisper-FT blog uses these exact strings.
+    # Don't clear suppress_tokens — Whisper relies on them to prevent rambling.
+    model.generation_config.language = "english"
     model.generation_config.task = "transcribe"
-    model.generation_config.forced_decoder_ids = None
-    model.config.forced_decoder_ids = None
-    model.config.suppress_tokens = []
 
     # Load + filter manifest
     records = load_manifest(args.manifest)
