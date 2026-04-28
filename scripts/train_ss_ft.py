@@ -1,13 +1,16 @@
-"""Tier-2 Lever A: per-speaker SS-FT on top of R1-D4b's LoRA.
+"""Per-speaker SS-FT for the B3 vs B4 controlled study.
 
-Loads BASE Gemma 4 + R1-D4b LoRA via PeftModel.from_pretrained(is_trainable=True),
-filters ss_train.jsonl to a single speaker, fine-tunes for 50-100 steps,
-saves the speaker-specific adapter to outputs/ss_ft/<participant_id>/.
+  B3: --start-from d4b  → load BASE+R1-D4b LoRA, fine-tune the existing adapter
+                          on per-speaker clips. Uses --si-lora-dir.
+  B4: --start-from base → load BASE Gemma, apply a *fresh* LoRA with the same
+                          r/alpha/target_modules/modules_to_save as R1-D4b,
+                          then fine-tune from scratch on per-speaker clips.
 
-Reuses train_gemma4_audio.py's collator + recipe wholesale; only differences:
-  - Resume from saved D4b LoRA (not fresh get_peft_model)
-  - Filter manifest to --participant-id
-  - Save to per-speaker subdir
+Same hyperparams (lr, steps, eff batch) for both — that's the whole point of
+the controlled comparison.
+
+Filters ss_train.jsonl to --participant-id, saves the speaker-specific
+adapter to outputs/ss_ft_{b3,b4}/<participant_id>/lora_final/.
 """
 from __future__ import annotations
 import os, json, argparse, time
@@ -40,8 +43,10 @@ def load_manifest(p):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--si-lora-dir", required=True,
-                    help="Path to R1-D4b's lora_final directory")
+    ap.add_argument("--start-from", choices=["d4b", "base"], default="d4b",
+                    help="d4b = warm-start from R1-D4b LoRA (B3); base = fresh LoRA on BASE Gemma (B4)")
+    ap.add_argument("--si-lora-dir", default=None,
+                    help="Path to R1-D4b's lora_final directory (required when --start-from d4b)")
     ap.add_argument("--manifest", required=True,
                     help="ss_train manifest (will be filtered to --participant-id)")
     ap.add_argument("--participant-id", required=True,
@@ -56,24 +61,61 @@ def main():
     ap.add_argument("--weight-decay", type=float, default=0.01)
     ap.add_argument("--max-length", type=int, default=2048)
     ap.add_argument("--seed", type=int, default=3407)
+    # B4 LoRA hyperparams (must match R1-D4b for fair comparison)
+    ap.add_argument("--lora-r", type=int, default=16)
+    ap.add_argument("--lora-alpha", type=int, default=16)
     args = ap.parse_args()
+
+    if args.start_from == "d4b" and not args.si_lora_dir:
+        raise SystemExit("--si-lora-dir is required when --start-from d4b")
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Unsloth's FastModel.from_pretrained handles Gemma 4's custom Linear wrappers
-    # (Gemma4ClippableLinear) — standard PEFT.from_pretrained doesn't.
-    print(f"[{time.strftime('%H:%M:%S')}] loading BASE+SI-FT LoRA from {args.si_lora_dir} ...", flush=True)
-    model, processor = FastModel.from_pretrained(
-        model_name=args.si_lora_dir,    # adapter_config.json + adapter weights live here
-        dtype=None, max_seq_length=args.max_length,
-        load_in_4bit=True, full_finetuning=False,
-    )
-    print(f"  loaded; VRAM={torch.cuda.memory_allocated()/1e9:.2f} GB")
-    # Ensure adapter is trainable (Unsloth loads in eval mode by default)
-    model.train()
-    for n, p in model.named_parameters():
-        if "lora_" in n.lower() or n.endswith("modules_to_save.default.weight") or n.endswith("modules_to_save.default.bias"):
-            p.requires_grad_(True)
+    if args.start_from == "d4b":
+        # B3: load BASE + R1-D4b LoRA via FastModel (handles Gemma4ClippableLinear)
+        print(f"[{time.strftime('%H:%M:%S')}] B3: loading BASE+SI-FT LoRA from {args.si_lora_dir} ...", flush=True)
+        model, processor = FastModel.from_pretrained(
+            model_name=args.si_lora_dir,
+            dtype=None, max_seq_length=args.max_length,
+            load_in_4bit=True, full_finetuning=False,
+        )
+        print(f"  loaded; VRAM={torch.cuda.memory_allocated()/1e9:.2f} GB")
+        model.train()
+        for n, p in model.named_parameters():
+            if "lora_" in n.lower() or n.endswith("modules_to_save.default.weight") or n.endswith("modules_to_save.default.bias"):
+                p.requires_grad_(True)
+    else:
+        # B4: load BASE Gemma, apply fresh LoRA matching R1-D4b's config
+        print(f"[{time.strftime('%H:%M:%S')}] B4: loading BASE {MODEL_ID} ...", flush=True)
+        model, processor = FastModel.from_pretrained(
+            model_name=MODEL_ID,
+            dtype=None, max_seq_length=args.max_length,
+            load_in_4bit=True, full_finetuning=False,
+        )
+        print(f"  loaded; VRAM={torch.cuda.memory_allocated()/1e9:.2f} GB")
+        print(f"[{time.strftime('%H:%M:%S')}] B4: applying fresh LoRA r={args.lora_r} alpha={args.lora_alpha} ...", flush=True)
+        model = FastModel.get_peft_model(
+            model,
+            finetune_vision_layers=False,
+            finetune_language_layers=True,
+            finetune_attention_modules=True,
+            finetune_mlp_modules=True,
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            lora_dropout=0,
+            bias="none",
+            random_state=args.seed,
+            use_rslora=False,
+            loftq_config=None,
+            target_modules=[
+                "q_proj", "k_proj", "v_proj", "o_proj",
+                "gate_proj", "up_proj", "down_proj",
+                "post", "linear_start", "linear_end",
+                "embedding_projection",
+            ],
+            modules_to_save=["lm_head", "embed_tokens"],
+        )
+        model.train()
 
     # Filter manifest to single speaker
     all_records = load_manifest(args.manifest)
@@ -150,6 +192,7 @@ def main():
     with open(os.path.join(args.output_dir, "ss_ft_stats.json"), "w") as f:
         json.dump({
             "participant_id": args.participant_id,
+            "start_from": args.start_from,
             "n_train_clips": len(speaker_records),
             "max_steps": args.max_steps,
             "lr": args.lr,

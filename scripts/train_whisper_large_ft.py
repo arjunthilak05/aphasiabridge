@@ -42,6 +42,7 @@ class WhisperCollator:
     processor: WhisperProcessor
     augment: str = "none"      # 'none' | 'specaug' | 'full'
     rng: Any = None
+    logged_label_debug: bool = False
 
     def __post_init__(self):
         import random
@@ -74,12 +75,36 @@ class WhisperCollator:
                 arr[b] = self.specaug.apply(arr[b], rng=self.rng)
             input_features = torch.from_numpy(arr)
 
-        # Tokenize labels
-        labels = self.processor.tokenizer(
+        # Tokenize labels with the standard Whisper recipe: mask padding using
+        # the tokenizer attention mask, then remove the decoder-start token if
+        # the tokenizer added it to every target.
+        label_batch = self.processor.tokenizer(
             transcripts, padding=True, return_tensors="pt"
-        )["input_ids"]
-        # Replace pad with -100 (ignore)
-        labels = labels.masked_fill(labels == self.processor.tokenizer.pad_token_id, -100)
+        )
+        labels = label_batch["input_ids"].masked_fill(
+            label_batch["attention_mask"].ne(1), -100
+        )
+        start_ids = [
+            self.processor.tokenizer.convert_tokens_to_ids("<|startoftranscript|>"),
+            self.processor.tokenizer.bos_token_id,
+        ]
+        start_ids = [x for x in start_ids if x is not None and x != self.processor.tokenizer.unk_token_id]
+        if (
+            labels.shape[1] > 0
+            and start_ids
+            and any((labels[:, 0] == start_id).all().cpu().item() for start_id in start_ids)
+        ):
+            labels = labels[:, 1:]
+
+        if not self.logged_label_debug:
+            debug_labels = labels[0].clone()
+            debug_labels[debug_labels == -100] = self.processor.tokenizer.pad_token_id
+            print(
+                "[collator] first label decodes to: "
+                f"{self.processor.tokenizer.decode(debug_labels, skip_special_tokens=False)[:300]}",
+                flush=True,
+            )
+            self.logged_label_debug = True
 
         return {"input_features": input_features, "labels": labels}
 
@@ -115,6 +140,9 @@ def main():
     # Don't clear suppress_tokens — Whisper relies on them to prevent rambling.
     model.generation_config.language = "english"
     model.generation_config.task = "transcribe"
+    forced_decoder_ids = processor.get_decoder_prompt_ids(language="en", task="transcribe")
+    model.generation_config.forced_decoder_ids = forced_decoder_ids
+    model.config.forced_decoder_ids = forced_decoder_ids
 
     # Load + filter manifest
     records = load_manifest(args.manifest)

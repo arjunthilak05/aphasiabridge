@@ -46,3 +46,4 @@ Thumbs.db
 *.pem
 *_token
 kaggle_token
+logs/
